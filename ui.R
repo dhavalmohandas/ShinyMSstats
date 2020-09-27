@@ -103,7 +103,7 @@ ui <- navbarPage(
     ),
   
   useShinyjs(),
-  extendShinyjs(text = jsCode),
+  extendShinyjs(text = jsCode,functions = c("init","enableTab")),
   tags$style(css),
   
   
