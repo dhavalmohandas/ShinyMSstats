@@ -72,7 +72,8 @@ get_data = reactive({
     }
     else if(input$filetype == 'sky') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
-      mydata <- SkylinetoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
+      #mydata <- SkylinetoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
+      mydata <- SkylinetoMSstatsFormat(data, annotation = get_annot())
     }
     else if(input$filetype == 'maxq') {
       data <- read.table(infile$datapath, header = T, sep = input$sep)
