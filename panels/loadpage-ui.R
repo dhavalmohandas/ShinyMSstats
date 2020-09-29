@@ -7,7 +7,7 @@ sbp_load = sidebarPanel(
   radioButtons("DDA_DIA",
                label = h4("Type of Acquisition", tipify(icon("question-circle"), 
                                                         title = "Select if the acquisition was Data Independent, Data Dependent or Selected/Parallel Reaction Monitoring")),
-               c("DDA" = "DDA", "DIA" = "DIA", "SRM/PRM" = "SRM_PRM")),
+               c("DDA" = "DDA", "DIA" = "DIA", "SRM/PRM" = "SRM_PRM", "TMT"="TMT")),
   
   # upload  
   
