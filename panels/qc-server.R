@@ -209,7 +209,7 @@ output$prepr_csv <- downloadHandler(
     paste("Preprocessed_data-", Sys.Date(), ".csv", sep="")
   },
   content = function(file) {
-    write.csv(preprocess_data()$ProcessedData, file)
+    write.csv(preprocess_data()$ProcessedData, file, row.names = F)
   }
 )
 
@@ -218,7 +218,7 @@ output$summ_csv <- downloadHandler(
     paste("Summarized_data-", Sys.Date(), ".csv", sep="")
   },
   content = function(file) {
-    write.csv(preprocess_data()$RunlevelData, file)
+    write.csv(preprocess_data()$RunlevelData, file, row.names = F)
   }
 )
 
