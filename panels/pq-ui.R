@@ -9,7 +9,7 @@ main = mainPanel(
                           radioButtons("typequant", 
                                        label = h4("Type of summarisation"), 
                                        c("Sample-level summarisation" = "Sample", "Group-level summarisation" = "Group")),
-                          radioButtons("format", "Save as", c("matrix" = "matrix", "array" = "long")),
+                          radioButtons("format", "Save as", c("Wide Format" = "matrix", "Long Format" = "long")),
                           downloadButton("download_summary", "Download")
                         )
                       )
