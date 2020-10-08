@@ -83,13 +83,17 @@ loadpage = fluidPage(
   tags$br(),
   sbp_load,
   column(width = 8,
-         h4("Summary of the data"),
+         h4("Summary of experimental design"),
          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                           tags$br(),
                           tags$h4("Calculation in progress...")),
-         verbatimTextOutput('summary'),
+         column(width=12, tableOutput('summary1'), style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
          tags$br(),
-         verbatimTextOutput('summary1')
+         h4("Summary of the dataset"),
+         column(width=12, tableOutput("summary2"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"),
+         h4("Top 6 rows of the dataset"),
+         column(width=12, tableOutput("summary"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;")
+         
   )
 )
 
