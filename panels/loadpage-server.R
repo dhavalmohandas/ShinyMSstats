@@ -1,5 +1,6 @@
 # toggle ui (DDA DIA SRM)
 
+
 observe({
   if (input$DDA_DIA == "DDA") {
     shinyjs::runjs("$('[type=radio][name=filetype]:disabled').parent().parent().parent().find('div.radio').css('opacity', 1)")
@@ -45,7 +46,15 @@ get_evidence = reactive({
   if(is.null(evidence)) {
     return(NULL)
     }
-  read.csv(evidence$datapath)
+  read.table(evidence$datapath, sep="\t", header=TRUE)
+})
+
+get_proteinGroups = reactive({
+  pGroup <- input$pGroup
+  if(is.null(pGroup)) {
+    return(NULL)
+  }
+  read.table(pGroup$datapath, sep="\t", header=TRUE)
 })
 
 get_data = reactive({
@@ -72,12 +81,19 @@ get_data = reactive({
     }
     else if(input$filetype == 'sky') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
-      #mydata <- SkylinetoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
-      mydata <- SkylinetoMSstatsFormat(data, annotation = get_annot())
+      data <- data[which(data$Fragment.Ion %in% c( "precursor", "precursor [M+1]","precursor [M+2]")), ]
+      mydata <- SkylinetoMSstatsFormat(data,
+                                       annotation = get_annot(),
+                                       fewMeasurements="remove",
+                                       removeProtein_with1Feature = input$remove)
     }
     else if(input$filetype == 'maxq') {
-      data <- read.table(infile$datapath, header = T, sep = input$sep)
-      mydata <- MaxQtoMSstatsFormat(proteinGroups = data, annotation = get_annot(), evidence = get_evidence(), removeProtein_with1Peptide = input$remove)
+      #data <- read.table(infile$datapath, header = T, sep = input$sep)
+      #mydata <- MaxQtoMSstatsFormat(proteinGroups = data, annotation = get_annot(), evidence = get_evidence(), removeProtein_with1Peptide = input$remove)
+      mydata <- MaxQtoMSstatsFormat(evidence=get_evidence(), annotation=get_annot(), proteinGroups=get_proteinGroups(),
+                                   useUniquePeptide = TRUE,
+                                   summaryforMultipleRows = max,
+                                   removeProtein_with1Peptide=TRUE)
     }
     else if(input$filetype == 'prog') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
@@ -104,6 +120,14 @@ get_data = reactive({
 
 ### outputs ###
 
+get_summary <- reactive({
+  if(is.null(get_data())) {
+    return(NULL)
+  }
+  data1 <- get_data()
+  data_summary <- Hmisc::describe(data1)
+})
+
 output$template <- downloadHandler(
   filename <- function() {
     paste("templateannotation", "csv", sep=".")
@@ -126,17 +150,62 @@ output$template1 <- downloadHandler(
   contentType = "txt"
 )
 
-output$summary <- renderPrint(
+output$summary <- renderTable(
   {
     req(get_data())
-    str(get_data())
-  }
+    head(get_data())
+  }, bordered = T
 )
 
-output$summary1 <-  renderPrint(
+output$summary1 <-  renderTable(
   {
     req(get_data())
-    summary(get_data())
-  }
+    if(input$filetype == 'sky'){
+      df <- get_data() %>% summarise("Number of Conditions" = n_distinct(Condition),
+                                     "Number of Biological Replicates" = n_distinct(BioReplicate),
+                                     "Number of Technical Replicates" = n(),
+                                     "Number of Fraction" = n(),
+                                     "Number of MS runs" = n_distinct(Run)
+     
+      )
+      df <- head(df,1)
+      t_df <- transpose(df)
+      rownames(t_df) <- colnames(df)
+      t_df <- cbind(rownames(t_df), t_df)
+  
+    }
+    else if(input$filetype == 'maxq'){
+      
+      df<- get_data()
+      
+    }
+    colnames(t_df) <- c("", "")
+    t_df
+    
+  }, bordered = T
+)
+
+output$summary2 <-  renderTable(
+  {
+    req(get_data())
+    
+    df <- get_data() %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
+                                   "Number of Peptides" = n_distinct(PeptideSequence),
+                                   "Number of peptides/protein" = n_distinct(ProteinName), 
+                                   "Number of features/peptides" = n_distinct(PeptideSequence),
+                                   "Max Intensity" = max(Intensity, na.rm=T),
+                                   "Min Intensity" = min(Intensity, na.rm=T)
+    )
+    Num_features <- get_data() %>% group_by(PeptideSequence, ProteinName, PrecursorCharge, FragmentIon)  %>% 
+      summarise("Number of features" = n()) %>% ungroup() %>% select("Number of features")
+      
+    df <- head(cbind(Num_features,df),1)
+    df <- head(df,1)
+    t_df <- transpose(df)
+    rownames(t_df) <- colnames(df)
+    t_df <- cbind(rownames(t_df), t_df)
+    colnames(t_df) <- c("", "")
+    t_df
+  }, bordered = T
 )
 
