@@ -64,7 +64,8 @@ sbp_params = sidebarPanel(
   
   # run 
   
-  actionButton("run", "Run Preprocessing")
+  actionButton("run", "Run Preprocessing"),
+  width = 3
 )
 
   
@@ -75,7 +76,7 @@ main = mainPanel(
   
   tabsetPanel(
     tabPanel("Preprocessed data", 
-             verbatimTextOutput('effect'),
+             #verbatimTextOutput('effect'),
              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                               tags$br(),
                               tags$br(),
