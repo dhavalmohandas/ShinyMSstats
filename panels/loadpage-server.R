@@ -41,12 +41,21 @@ get_annot = reactive({
   read.csv(annot$datapath)
 })
 
+get_annot1 = reactive({
+  annot1 <- input$annot1
+  if(is.null(annot1)) {
+    return(NULL)
+  }
+  read.csv(annot1$datapath, header = T)
+})
+
 get_evidence = reactive({
   evidence <- input$evidence
   if(is.null(evidence)) {
     return(NULL)
     }
   read.table(evidence$datapath, sep="\t", header=TRUE)
+  cat(file=stderr(), "Reached in evidence")
 })
 
 get_proteinGroups = reactive({
@@ -82,18 +91,21 @@ get_data = reactive({
     else if(input$filetype == 'sky') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
       data <- data[which(data$Fragment.Ion %in% c( "precursor", "precursor [M+1]","precursor [M+2]")), ]
+      cat(file=stderr(), "Reached here in skyline\n")
       mydata <- SkylinetoMSstatsFormat(data,
                                        annotation = get_annot(),
                                        fewMeasurements="remove",
                                        removeProtein_with1Feature = input$remove)
     }
     else if(input$filetype == 'maxq') {
-      #data <- read.table(infile$datapath, header = T, sep = input$sep)
-      #mydata <- MaxQtoMSstatsFormat(proteinGroups = data, annotation = get_annot(), evidence = get_evidence(), removeProtein_with1Peptide = input$remove)
-      mydata <- MaxQtoMSstatsFormat(evidence=get_evidence(), annotation=get_annot(), proteinGroups=get_proteinGroups(),
+      ev <- get_evidence()
+      an <- get_annot1()
+      pg <- get_proteinGroups()
+      cat(file=stderr(), "Reached in maxq\n")
+      mydata <- MaxQtoMSstatsFormat(evidence= ev, annotation= an, proteinGroups= pg,
                                    useUniquePeptide = TRUE,
                                    summaryforMultipleRows = max,
-                                   removeProtein_with1Peptide=TRUE)
+                                   removeProtein_with1Peptide=input$remove)
     }
     else if(input$filetype == 'prog') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
@@ -107,12 +119,19 @@ get_data = reactive({
       mydata <- SpectronauttoMSstatsFormat(data)
     }
     else if(input$filetype == 'open') {
-      raw <- sample_annotation(data=data,
-                               sample.annotation=get_annot(),
-                               data.type='OpenSWATH')
-      data.filtered <- filter_mscore(raw, 0.01)
-      data.transition <- disaggregate(data.filtered)
-      mydata <- convert4MSstats(data.transition)
+      data <- read.csv(infile$datapath, header = T, sep = input$sep)
+      OpenSWATHtoMSstatsFormat(raw,
+                               annotation = get_annot(),
+                               filter_with_mscore = TRUE, ## same as default
+                               mscore_cutoff = 0.01, ## same as default
+                               fewMeasurements="remove",
+                               removeProtein_with1Feature = input$remove)
+      # raw <- sample_annotation(data=data,
+      #                          sample.annotation=get_annot(),
+      #                          data.type='OpenSWATH')
+      # data.filtered <- filter_mscore(raw, 0.01)
+      # data.transition <- disaggregate(data.filtered)
+      # mydata <- convert4MSstats(data.transition)
     }}
   mydata <- unique(data.frame(mydata))
   return(mydata)
@@ -160,25 +179,44 @@ output$summary <- renderTable(
 output$summary1 <-  renderTable(
   {
     req(get_data())
-    if(input$filetype == 'sky'){
-      df <- get_data() %>% summarise("Number of Conditions" = n_distinct(Condition),
-                                     "Number of Biological Replicates" = n_distinct(BioReplicate),
-                                     "Number of Technical Replicates" = n(),
-                                     "Number of Fraction" = n(),
-                                     "Number of MS runs" = n_distinct(Run)
-     
+    df <- get_data()
+    
+    if ("Fraction" %in% colnames(df)){
+      df1 <- df %>% summarise("Number of Conditions" = n_distinct(Condition),
+                              "Number of Biological Replicates" = n_distinct(BioReplicate),
+                              "Number of Technical Replicates" = n(),
+                              "Number_of_Fraction" = n_distinct(Fraction),
+                              "Number of MS runs" = n_distinct(Run)
+                              
+                              
+                              
       )
-      df <- head(df,1)
-      t_df <- transpose(df)
-      rownames(t_df) <- colnames(df)
-      t_df <- cbind(rownames(t_df), t_df)
-  
-    }
-    else if(input$filetype == 'maxq'){
       
-      df<- get_data()
+      df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>% 
+        select("Condition_Run")
+      df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>% 
+        select("BioReplicate_Run")
+      df <- cbind(df1,df2,df3) %>% 
+        mutate("Number of Technical Replicates" = Condition_Run/(BioReplicate_Run*Number_of_Fraction) ) %>%
+        select(-Condition_Run,-BioReplicate_Run)
+      
       
     }
+    
+    else{
+      df <- df %>% summarise("Number of Conditions" = n_distinct(Condition),
+                             "Number of Biological Replicates" = n_distinct(BioReplicate),
+                             "Number of MS runs" = n_distinct(Run)
+                             
+      )
+      
+    }
+    
+    df <- head(df,1)
+    t_df <- transpose(df)
+    rownames(t_df) <- colnames(df)
+    t_df <- cbind(rownames(t_df), t_df)
+    
     colnames(t_df) <- c("", "")
     t_df
     
@@ -188,22 +226,51 @@ output$summary1 <-  renderTable(
 output$summary2 <-  renderTable(
   {
     req(get_data())
+    df <- get_data()
+    df <- df %>% mutate("FEATURES" = ifelse(input$filetype == 'prog'||
+                                            input$filetype == 'PD',
+                                          paste(PeptideModifiedSequence, ProteinName, PrecursorCharge, FragmentIon, sep = '_'),
+                                          paste(PeptideSequence, ProteinName, PrecursorCharge, FragmentIon, sep = '_'))
+                        )
     
-    df <- get_data() %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
-                                   "Number of Peptides" = n_distinct(PeptideSequence),
-                                   "Number of peptides/protein" = n_distinct(ProteinName), 
-                                   "Number of features/peptides" = n_distinct(PeptideSequence),
-                                   "Max Intensity" = max(Intensity, na.rm=T),
-                                   "Min Intensity" = min(Intensity, na.rm=T)
+    if(input$filetype == 'prog' || input$filetype == 'PD' ){
+      Peptides_Proteins <- df %>% group_by(PeptideModifiedSequence, ProteinName)  %>%
+        summarise("Number of peptides/proteins" = n()) %>% ungroup() %>% select("Number of peptides/proteins")
+
+      Features_Peptides <- df %>% group_by(FEATURES, PeptideModifiedSequence)  %>%
+        summarise("Number of features/peptides" = n()) %>% ungroup() %>% select("Number of features/peptides")
+
+    }
+    else {
+      Peptides_Proteins <- df %>% group_by(PeptideSequence, ProteinName)  %>%
+        summarise("Number of peptides/protein" = n()) %>% ungroup() %>% select("Number of peptides/protein")
+
+      Features_Peptides <- df %>% group_by(FEATURES, PeptideSequence)  %>%
+        summarise("Number of features/peptides" = n()) %>% ungroup() %>% select("Number of features/peptides")
+    }
+    
+    df <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
+                                   "Number of Peptides" = ifelse(input$filetype == 'prog'||
+                                                                   input$filetype == 'PD',
+                                                                 n_distinct(PeptideModifiedSequence),
+                                                                 n_distinct(PeptideSequence)),
+                                   "Number of features" = n_distinct(FEATURES),
+                                   "Max Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
+                                                            max(Intensity, na.rm=T)),
+                                   "Min Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,
+                                                            min(Intensity, na.rm=T))
     )
-    Num_features <- get_data() %>% group_by(PeptideSequence, ProteinName, PrecursorCharge, FragmentIon)  %>% 
-      summarise("Number of features" = n()) %>% ungroup() %>% select("Number of features")
-      
-    df <- head(cbind(Num_features,df),1)
-    df <- head(df,1)
+
+
+    df <- head(cbind(df,Peptides_Proteins,Features_Peptides),1)
+    df <- df[,c(1,2,3,6,7,4,5)]
     t_df <- transpose(df)
     rownames(t_df) <- colnames(df)
     t_df <- cbind(rownames(t_df), t_df)
+
+    colnames(t_df) <- c("", "value")
+    t_df$value <- sub("\\.\\d+$", "", t_df$value)
+
     colnames(t_df) <- c("", "")
     t_df
   }, bordered = T

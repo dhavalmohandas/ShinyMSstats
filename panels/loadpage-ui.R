@@ -28,7 +28,7 @@ sbp_load = sidebarPanel(
                                 c(Comma=",",Semicolon=";", Tab="\t",Pipe="|"), inline = T)),
   tags$br(),
   conditionalPanel(
-    condition = "input.filetype == 'sky' || input.filetype == 'prog' || input.filetype == 'PD' || input.filetype == 'spec' || input.filetype == 'open'",
+    condition = "input.filetype == 'sky' || input.filetype == 'prog' || input.filetype == 'PD' || input.filetype == 'spec' || input.filetype == 'open' ",
     h4("Upload annotation File"),
     fileInput('annot', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
     downloadLink("template", "Open annotation file template")
@@ -41,7 +41,7 @@ sbp_load = sidebarPanel(
     h4("Upload proteinGroups.txt File"),
     fileInput('pGroup', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
     h4("Upload annotation File"),
-    fileInput('annot', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
+    fileInput('annot1', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
   ),
   tags$hr(),
   conditionalPanel(condition = "input.filetype && input.DDA_DIA == 'DDA' && input.filetype !== 'sample'",
@@ -89,7 +89,7 @@ loadpage = fluidPage(
                           tags$h4("Calculation in progress...")),
          column(width=12, tableOutput('summary1'), style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
          tags$br(),
-         h4("Summary of the dataset"),
+         h4("Summary of dataset"),
          column(width=12, tableOutput("summary2"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"),
          h4("Top 6 rows of the dataset"),
          column(width=12, tableOutput("summary"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;")

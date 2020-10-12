@@ -1,8 +1,13 @@
-
+options(shiny.autoreload = TRUE)
 library(shiny)
 library(shinyBS)
 library(shinyjs)
 library(STRINGdb)
+library(ggplot2)
+library(dplyr)
+library(data.table)
+
+
 if (FALSE) require("V8")
 library(MSnbase)
 
