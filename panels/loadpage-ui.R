@@ -6,14 +6,20 @@ sbp_load = sidebarPanel(
   
   radioButtons("DDA_DIA",
                label = h4("Type of Acquisition", tipify(icon("question-circle"), 
-                                                        title = "Select if the acquisition was Data Independent, Data Dependent or Selected/Parallel Reaction Monitoring")),
+                                                        title = "Select if the acquisition was Data Independent, 
+                                                        Data Dependent or Selected/Parallel Reaction Monitoring")),
                c("DDA" = "DDA", "DIA" = "DIA", "SRM/PRM" = "SRM_PRM", "TMT"="TMT")),
   
   # upload  
   
   radioButtons("filetype",
-               label = h4("Type of File", tipify(icon("question-circle"), title = "Choose input type: sample dataset, classical 10-column dataset, or outputs from Skyline, MaxQuant, Progenesis or Proteome Discoverer")),
-               choices = c("sample dataset" = "sample", "10 column dataset" = "10col", "Skyline" = "sky", "MaxQuant" = "maxq", "Progenesis" = "prog", "Proteome Discoverer" = "PD", "Spectronaut" = "spec", "OpenSWATH" = "open"), selected = character(0)),
+               label = h4("Type of File", tipify(icon("question-circle"), 
+                                                 title = "Choose input type: sample dataset, classical 10-column dataset, 
+                                                 or outputs from Skyline, MaxQuant, Progenesis or Proteome Discoverer")),
+               choices = c("sample dataset" = "sample", "10 column dataset" = "10col", 
+                           "Skyline" = "sky", "MaxQuant" = "maxq", "Progenesis" = "prog", 
+                           "Proteome Discoverer" = "PD", "Spectronaut" = "spec", 
+                           "OpenSWATH" = "open"), selected = character(0)),
   tags$hr(),
   conditionalPanel(condition = "input.filetype =='10col' || input.filetype =='prog' || input.filetype =='PD' || input.filetype =='open'",
                    h4("Upload quantification dataset")),
@@ -24,7 +30,8 @@ sbp_load = sidebarPanel(
   conditionalPanel(condition = "input.filetype && input.filetype != 'maxq' && input.filetype != 'sample'",
                    fileInput('data', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
                    radioButtons("sep",
-                                label = h5("Column separator in uploaded file",tipify(icon("question-circle"), title = "Choose how columns are separated in the uploaded file")),
+                                label = h5("Column separator in uploaded file",tipify(icon("question-circle"), 
+                                                                                      title = "Choose how columns are separated in the uploaded file")),
                                 c(Comma=",",Semicolon=";", Tab="\t",Pipe="|"), inline = T)),
   tags$br(),
   conditionalPanel(

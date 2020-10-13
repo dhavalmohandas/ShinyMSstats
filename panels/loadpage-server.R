@@ -43,30 +43,43 @@ get_annot = reactive({
 
 get_annot1 = reactive({
   annot1 <- input$annot1
-  if(is.null(annot1)) {
+  if(is.null(input$annot1)) {
     return(NULL)
   }
-  read.csv(annot1$datapath, header = T)
+  annot1<-read.csv(annot1$datapath, header = T)
+  cat(file=stderr(), "Reached in maxq annot\n")
+  return(annot1)
+  
 })
 
 get_evidence = reactive({
   evidence <- input$evidence
-  if(is.null(evidence)) {
+  if(is.null(input$evidence)) {
     return(NULL)
     }
-  read.table(evidence$datapath, sep="\t", header=TRUE)
-  cat(file=stderr(), "Reached in evidence")
+  evidence <- read.table(evidence$datapath, sep="\t", header=TRUE)
+  cat(file=stderr(), "Reached in evidence\n")
+  return(evidence)
+  
 })
 
 get_proteinGroups = reactive({
   pGroup <- input$pGroup
-  if(is.null(pGroup)) {
+  if(is.null(input$pGroup)) {
     return(NULL)
   }
-  read.table(pGroup$datapath, sep="\t", header=TRUE)
+  pGroup<-read.table(pGroup$datapath, sep="\t", header=TRUE)
+  cat(file=stderr(), "Reached in proteins_group\n")
+  return(pGroup)
 })
 
 get_data = reactive({
+  ev_maxq <- get_evidence()
+  pg_maxq <- get_proteinGroups()
+  an_maxq <- get_annot1()
+  cat(file=stderr(), "Reached in get_data\n")
+  
+  cat(file=stderr(), paste("File type is",input$filetype,"\n"))
   if(is.null(input$filetype)) {
     return(NULL)
     }
@@ -82,27 +95,37 @@ get_data = reactive({
     }
   else {
     infile <- input$data
-    if(is.null(infile)) {
-      return(NULL)
+    
+    if(input$filetype!='maxq'){
+      if(is.null(infile)) {
+        return(NULL)
+      }
     }
+    else{
+      if(is.null(ev_maxq) || is.null(pg_maxq) || is.null(an_maxq) ) {
+        return(NULL)
+      }
+      
+    }
+    
+    
     if(input$filetype == '10col') {
       mydata <- read.csv(infile$datapath, header = T, sep = input$sep)
     }
     else if(input$filetype == 'sky') {
+      cat(file=stderr(), "Reached here in skyline\n")
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
       data <- data[which(data$Fragment.Ion %in% c( "precursor", "precursor [M+1]","precursor [M+2]")), ]
-      cat(file=stderr(), "Reached here in skyline\n")
+      
       mydata <- SkylinetoMSstatsFormat(data,
                                        annotation = get_annot(),
                                        fewMeasurements="remove",
                                        removeProtein_with1Feature = input$remove)
     }
     else if(input$filetype == 'maxq') {
-      ev <- get_evidence()
-      an <- get_annot1()
-      pg <- get_proteinGroups()
       cat(file=stderr(), "Reached in maxq\n")
-      mydata <- MaxQtoMSstatsFormat(evidence= ev, annotation= an, proteinGroups= pg,
+      
+      mydata <- MaxQtoMSstatsFormat(evidence= ev_maxq, annotation= an_maxq, proteinGroups= pg_maxq,
                                    useUniquePeptide = TRUE,
                                    summaryforMultipleRows = max,
                                    removeProtein_with1Peptide=input$remove)
@@ -116,6 +139,7 @@ get_data = reactive({
       mydata <- PDtoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
     }
     else if(input$filetype == 'spec') {
+      data <- read.csv(infile$datapath, header = T, sep = input$sep)
       mydata <- SpectronauttoMSstatsFormat(data)
     }
     else if(input$filetype == 'open') {
