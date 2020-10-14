@@ -132,11 +132,14 @@ get_data = reactive({
     }
     else if(input$filetype == 'prog') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
+      
       mydata <- ProgenesistoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
+      colnames(mydata)[colnames(mydata) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
     }
     else if(input$filetype == 'PD') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep)
       mydata <- PDtoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
+      colnames(mydata)[colnames(mydata) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
     }
     else if(input$filetype == 'spec') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep)
@@ -251,34 +254,19 @@ output$summary2 <-  renderTable(
   {
     req(get_data())
     df <- get_data()
-    df <- df %>% mutate("FEATURES" = ifelse(input$filetype == 'prog'||
-                                            input$filetype == 'PD',
-                                          paste(PeptideModifiedSequence, ProteinName, PrecursorCharge, FragmentIon, sep = '_'),
-                                          paste(PeptideSequence, ProteinName, PrecursorCharge, FragmentIon, sep = '_'))
-                        )
+    df <- df %>% mutate("FEATURES" = paste(PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, sep = '_'))
     
-    if(input$filetype == 'prog' || input$filetype == 'PD' ){
-      Peptides_Proteins <- df %>% group_by(PeptideModifiedSequence, ProteinName)  %>%
-        summarise("Number of peptides/proteins" = n()) %>% ungroup() %>% select("Number of peptides/proteins")
-
-      Features_Peptides <- df %>% group_by(FEATURES, PeptideModifiedSequence)  %>%
-        summarise("Number of features/peptides" = n()) %>% ungroup() %>% select("Number of features/peptides")
-
-    }
-    else {
-      Peptides_Proteins <- df %>% group_by(PeptideSequence, ProteinName)  %>%
-        summarise("Number of peptides/protein" = n()) %>% ungroup() %>% select("Number of peptides/protein")
-
-      Features_Peptides <- df %>% group_by(FEATURES, PeptideSequence)  %>%
-        summarise("Number of features/peptides" = n()) %>% ungroup() %>% select("Number of features/peptides")
-    }
+    # Peptides_Proteins <- df %>% group_by(PeptideSequence, ProteinName)  %>%
+    #   summarise("Number of peptides/protein" = n()) %>% ungroup() %>% select("Number of peptides/protein")
+    # 
+    # Features_Peptides <- df %>% group_by(FEATURES, PeptideSequence)  %>%
+    #   summarise("Number of features/peptides" = n()) %>% ungroup() %>% select("Number of features/peptides")
     
-    df <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
-                                   "Number of Peptides" = ifelse(input$filetype == 'prog'||
-                                                                   input$filetype == 'PD',
-                                                                 n_distinct(PeptideModifiedSequence),
-                                                                 n_distinct(PeptideSequence)),
-                                   "Number of features" = n_distinct(FEATURES),
+    df1 <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
+                                   "Number of Peptides" = n_distinct(PeptideSequence),
+                                   "Number of Features" = n_distinct(FEATURES),
+                                   "Number of Peptides/Proteins" = n_distinct(paste(PeptideSequence,ProteinName)),
+                                   "Number of Features/Peptides" = n_distinct(paste(FEATURES,PeptideSequence)),
                                    "Max Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
                                                             max(Intensity, na.rm=T)),
                                    "Min Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,
@@ -286,17 +274,19 @@ output$summary2 <-  renderTable(
     )
 
 
-    df <- head(cbind(df,Peptides_Proteins,Features_Peptides),1)
-    df <- df[,c(1,2,3,6,7,4,5)]
-    t_df <- transpose(df)
-    rownames(t_df) <- colnames(df)
+    t_df <- transpose(df1)
+    rownames(t_df) <- colnames(df1)
     t_df <- cbind(rownames(t_df), t_df)
+    
+    # mm1 <- as.matrix(t_df)
+    # mm2 <- matrix(mm1, ncol = ncol(t_df), dimnames = NULL)
+    # mm2
 
     colnames(t_df) <- c("", "value")
     t_df$value <- sub("\\.\\d+$", "", t_df$value)
 
     colnames(t_df) <- c("", "")
     t_df
-  }, bordered = T
+  }, bordered = T, align='lr'
 )
 
