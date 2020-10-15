@@ -4,7 +4,7 @@ library(shinyBS)
 library(shinyjs)
 library(STRINGdb)
 library(ggplot2)
-library(dplyr)
+library(tidyverse)
 library(data.table)
 
 

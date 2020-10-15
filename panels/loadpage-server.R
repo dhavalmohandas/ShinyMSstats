@@ -207,46 +207,30 @@ output$summary1 <-  renderTable(
   {
     req(get_data())
     df <- get_data()
+    nf <- ifelse("Fraction" %in% colnames(df),n_distinct(df$Fraction),1)
+    df1 <- df %>% summarise("Number of Conditions" = n_distinct(Condition),
+                            "Number of Biological Replicates" = n_distinct(BioReplicate),
+                            "Number_of_Fraction" = nf,
+                            "Number of MS runs" = n_distinct(Run)
+                            )
+    df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>% 
+      select("Condition_Run")
+    df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>% 
+      select("BioReplicate_Run")
+    df <- cbind(df1,df2,df3) %>% 
+      mutate("Number of Technical Replicates" = Condition_Run/(BioReplicate_Run*Number_of_Fraction) ) %>%
+      select(-Condition_Run,-BioReplicate_Run)
     
-    if ("Fraction" %in% colnames(df)){
-      df1 <- df %>% summarise("Number of Conditions" = n_distinct(Condition),
-                              "Number of Biological Replicates" = n_distinct(BioReplicate),
-                              "Number of Technical Replicates" = n(),
-                              "Number_of_Fraction" = n_distinct(Fraction),
-                              "Number of MS runs" = n_distinct(Run)
-                              
-                              
-                              
-      )
-      
-      df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>% 
-        select("Condition_Run")
-      df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>% 
-        select("BioReplicate_Run")
-      df <- cbind(df1,df2,df3) %>% 
-        mutate("Number of Technical Replicates" = Condition_Run/(BioReplicate_Run*Number_of_Fraction) ) %>%
-        select(-Condition_Run,-BioReplicate_Run)
-      
-      
-    }
+    df <- head(df,1) 
+    df <- df[,c(1,2,5,3,4)]
     
-    else{
-      df <- df %>% summarise("Number of Conditions" = n_distinct(Condition),
-                             "Number of Biological Replicates" = n_distinct(BioReplicate),
-                             "Number of MS runs" = n_distinct(Run)
-                             
-      )
-      
-    }
-    
-    df <- head(df,1)
-    t_df <- transpose(df)
+    t_df <- as.data.frame(t(df))
     rownames(t_df) <- colnames(df)
     t_df <- cbind(rownames(t_df), t_df)
-    
+    colnames(t_df) <- c("", "value")
+    t_df$value <- sub("\\.\\d+$", "", t_df$value)
     colnames(t_df) <- c("", "")
     t_df
-    
   }, bordered = T
 )
 
@@ -256,35 +240,35 @@ output$summary2 <-  renderTable(
     df <- get_data()
     df <- df %>% mutate("FEATURES" = paste(PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, sep = '_'))
     
-    # Peptides_Proteins <- df %>% group_by(PeptideSequence, ProteinName)  %>%
-    #   summarise("Number of peptides/protein" = n()) %>% ungroup() %>% select("Number of peptides/protein")
-    # 
-    # Features_Peptides <- df %>% group_by(FEATURES, PeptideSequence)  %>%
-    #   summarise("Number of features/peptides" = n()) %>% ungroup() %>% select("Number of features/peptides")
-    
     df1 <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
                                    "Number of Peptides" = n_distinct(PeptideSequence),
                                    "Number of Features" = n_distinct(FEATURES),
-                                   "Number of Peptides/Proteins" = n_distinct(paste(PeptideSequence,ProteinName)),
-                                   "Number of Features/Peptides" = n_distinct(paste(FEATURES,PeptideSequence)),
-                                   "Max Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
-                                                            max(Intensity, na.rm=T)),
-                                   "Min Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,
-                                                            min(Intensity, na.rm=T))
-    )
+                                   "Min_Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,min(Intensity, na.rm=T)),
+                                   "Max_Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
+                                                            max(Intensity, na.rm=T))) %>%
+      unite("Range of intensity", Min_Intensity:Max_Intensity, sep = " - ")
+    
+    Peptides_Proteins <- df %>% group_by(ProteinName)  %>%
+      summarise(npep = n_distinct(PeptideSequence)) %>% summarize(Peptides_Proteins_min=min(npep),
+                                                                  Peptides_Proteins_max=max(npep))
+    
+    Features_Peptides <- df %>% group_by(PeptideSequence)  %>%
+      summarise(nfea = n_distinct(FEATURES)) %>% summarize(Features_Peptides_min=min(nfea),
+                                                           Features_Peptides_max=max(nfea))
+    
+    df1 <- cbind(df1,Features_Peptides,Peptides_Proteins) %>%
+      unite("Range of Features/Peptide",Features_Peptides_min:Features_Peptides_max,sep = " - ") %>%
+      unite("Range of Peptides/Protein",Peptides_Proteins_min:Peptides_Proteins_max, sep = " - ")
+    
+    df1 <- df1[,c(1,2,3,6,5,4)]
 
-
-    t_df <- transpose(df1)
+    t_df <- as.data.frame(t(df1))
     rownames(t_df) <- colnames(df1)
     t_df <- cbind(rownames(t_df), t_df)
-    
-    # mm1 <- as.matrix(t_df)
-    # mm2 <- matrix(mm1, ncol = ncol(t_df), dimnames = NULL)
-    # mm2
 
     colnames(t_df) <- c("", "value")
     t_df$value <- sub("\\.\\d+$", "", t_df$value)
-
+    
     colnames(t_df) <- c("", "")
     t_df
   }, bordered = T, align='lr'
