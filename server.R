@@ -39,6 +39,11 @@ shinyServer(function(input, output, session) {
   # load data
   source("panels/loadpage-server.R", local = T)
 #  source("panels/home-server.R", local = T)
+  
+  observeEvent(input$proceed, {
+    updateTabsetPanel(session = session, inputId = "tablist", selected = "Uploaddata")
+  })
+  
   source("panels/utils.R", local = T)
   # data preprocessing
   source("panels/qc-server.R", local = T)

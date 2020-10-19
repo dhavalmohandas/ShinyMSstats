@@ -113,7 +113,7 @@ ui <- navbarPage(
   
   
   tabPanel("Homepage", icon = icon("home"), home),
-  tabPanel("Upload data", icon = icon("send"), loadpage),
+  tabPanel("Upload data", value = "Uploaddata", icon = icon("send"), loadpage),
   tabPanel("Data Processing", icon = icon("gears"), qc),
   tabPanel("Protein Quantification", icon = icon("calculator"), pq),
   tabPanel("Statistical Model", icon = icon("magic"), statmodel),

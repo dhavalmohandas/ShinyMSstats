@@ -15,3 +15,4 @@ output$count <- renderText({
 observeEvent(input$Foo, {
   js$enableTab("Data processing")
 })
+
