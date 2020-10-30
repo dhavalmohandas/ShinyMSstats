@@ -5,13 +5,13 @@ sbp_params = sidebarPanel(
   # transformation
   
   radioButtons("log", 
-               label= h4("Log transformation", tipify(icon("question-circle"), title = "Logarithmic transformation is applied to the Intensities column")), c(log2 = "2", log10 = "10")),
+               label= h4("1. Log transformation", tipify(icon("question-circle"), title = "Logarithmic transformation is applied to the Intensities column")), c(log2 = "2", log10 = "10")),
   tags$hr(),
   
   #normalisation
   
   selectInput("norm", 
-              label = h4("Normalisation", tipify(icon("question-circle"), title = "Choose a normalisation method.  For more information visit the Help tab")), c("none" = "FALSE", "equalize medians" = "equalizeMedians", "quantile" = "quantile", "global standards" = "globalStandards"), selected = "equalizeMedians"),
+              label = h4("2. Normalisation", tipify(icon("question-circle"), title = "Choose a normalisation method.  For more information visit the Help tab")), c("none" = "FALSE", "equalize medians" = "equalizeMedians", "quantile" = "quantile", "global standards" = "globalStandards"), selected = "equalizeMedians"),
   conditionalPanel(condition = "input.norm == 'globalStandards'",
                    radioButtons("standards", "Choose type of standards", c("Proteins", "Peptides")),
                    uiOutput("Names")
@@ -20,39 +20,48 @@ sbp_params = sidebarPanel(
   
   # features
   
-  h4("Used features"),
-  checkboxInput("all_feat", "Use all features", value = TRUE),
-  uiOutput("features"),
+  #h4("3. Used features"),
+  radioButtons("features_used",
+               label = h4("3. Used features"),
+               c("Use all features" = "all_feat", "Use top N features" = "n_feat", "Remove uninformative features & outliers" = "clean_features")),
+  #checkboxInput("all_feat", "Use all features", value = TRUE),
+  conditionalPanel(condition = "input.features_used =='n_feat'",
+                   uiOutput("features")),
+  #uiOutput("features"),
   tags$hr(),
   
   ### censoring
   
-  h4("Censored values"),
+  h4("4. Missing values (not random missing or censored)"),
   radioButtons('censInt', 
-              label = h5("Assumptions for censored data", tipify(icon("question-circle"), title = "Processing software report missing values differently; please choose the appropriate options to distinguish missing values and if censored/at random")), c("assume all NA as censored" = "NA", "assume all between 0 and 1 as censored" = "0", "all missing values are random" = "null"), selected = "NA"),
+              label = h5("Assumptions for missing values", tipify(icon("question-circle"), title = "Processing software report missing values differently; please choose the appropriate options to distinguish missing values and if censored/at random")), c("assume all NA as censored" = "NA", "assume all between 0 and 1 as censored" = "0", "all missing values are random" = "null"), selected = "NA"),
   radioTooltip(id = "censInt", choice = "NA", title = "It assumes that all NAs in Intensity column are censored.", placement = "right", trigger = "hover"),
   radioTooltip(id = "censInt", choice = "0", title = "It assumes that all values between 0 and 1 in Intensity column are censored.  NAs will be considered as random missing.", placement = "right", trigger = "hover"),
   radioTooltip(id = "censInt", choice = "null", title = "It assumes that all missing values are randomly missing.", placement = "right", trigger = "hover"),
+  
+  # max quantile for censored
+  h5("Max quantile for censored", tipify(icon("question-circle"), title = "Max quantile for censored")),
+  checkboxInput("null", "Do not apply cutoff"),
+  numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001),
+  
   
   # cutoff for censored
   conditionalPanel(condition = "input.censInt == 'NA' || input.censInt == '0'",
                    selectInput("cutoff", "cutoff value for censoring", c("min value per feature"="minFeature", "min value per feature and run"="minFeatureNRun", "min value per run"="minRun"))),
   
-  # max quantile for censored
-  h5("Max quantile for censored"),
-  checkboxInput("null", "Do not apply censored cutoff"),
-  numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001),
+  
   
   # MBi
+  h4("5. Imputation"),
   conditionalPanel(condition = "input.censInt == 'NA' || input.censInt == '0'",
                    checkboxInput("MBi", 
                                  label = p("Model Based imputation", tipify(icon("question-circle"), title = "If unchecked the values set as cutoff for censored will be used")), value = TRUE
                                  )),
   tags$hr(),
-  
+  tags$style(HTML('#run{background-color:orange}')),
   ### summary method
   
-  h4("Summarization", tipify(icon("question-circle"), title = "Run-level summarization method")),
+  h4("6. Summarization", tipify(icon("question-circle"), title = "Run-level summarization method")),
   p("method: TMP"),
   p("For linear summarzation please use command line"),
   tags$hr(),

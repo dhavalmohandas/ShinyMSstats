@@ -22,3 +22,7 @@ output$download_summary <- downloadHandler(
 # abundance
 
 output$abundance <- renderDataTable(abundance())
+
+observeEvent(input$proceed4, {
+  updateTabsetPanel(session = session, inputId = "tablist", selected = "StatsModel")
+})

@@ -1,6 +1,9 @@
 
 
 home = fluidPage(
+  tags$head(
+    tags$style(HTML('#proceed{background-color:orange}'))
+  ),
   headerPanel("Welcome to MSstats-shiny"),
   tags$br(),
   mainPanel(

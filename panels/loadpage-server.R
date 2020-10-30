@@ -5,8 +5,10 @@ observe({
   if (input$DDA_DIA == "DDA") {
     shinyjs::runjs("$('[type=radio][name=filetype]:disabled').parent().parent().parent().find('div.radio').css('opacity', 1)")
     shinyjs::enable("filetype")
-    shinyjs::disable(selector = "[type=radio][value=open]")
     shinyjs::disable(selector = "[type=radio][value=spec]")
+    shinyjs::disable(selector = "[type=radio][value=open]")
+    shinyjs::disable(selector = "[type=radio][value=ump]")
+    shinyjs::disable(selector = "[type=radio][value=spmin]")
     shinyjs::runjs("$.each($('[type=radio][name=filetype]:disabled'), function(_, e){ $(e).parent().parent().css('opacity', 0.4) })")
   }
   else if (input$DDA_DIA == "DIA") {
@@ -15,16 +17,33 @@ observe({
     shinyjs::disable(selector = "[type=radio][value=maxq]")
     shinyjs::disable(selector = "[type=radio][value=prog]")
     shinyjs::disable(selector = "[type=radio][value=PD]")
+    shinyjs::disable(selector = "[type=radio][value=openms]")
+    shinyjs::disable(selector = "[type=radio][value=spmin]")
     shinyjs::runjs("$.each($('[type=radio][name=filetype]:disabled'), function(_, e){ $(e).parent().parent().css('opacity', 0.4) })")
   }
   else if (input$DDA_DIA == "SRM_PRM") {
     shinyjs::runjs("$('[type=radio][name=filetype]:disabled').parent().parent().parent().find('div.radio').css('opacity', 1)")
     shinyjs::enable("filetype")
-    shinyjs::disable(selector = "[type=radio][value=open]")
-    shinyjs::disable(selector = "[type=radio][value=spec]")
     shinyjs::disable(selector = "[type=radio][value=maxq]")
     shinyjs::disable(selector = "[type=radio][value=prog]")
     shinyjs::disable(selector = "[type=radio][value=PD]")
+    shinyjs::disable(selector = "[type=radio][value=openms]")
+    shinyjs::disable(selector = "[type=radio][value=spec]")
+    shinyjs::disable(selector = "[type=radio][value=open]")
+    shinyjs::disable(selector = "[type=radio][value=ump]")
+    shinyjs::disable(selector = "[type=radio][value=spmin]")
+    shinyjs::runjs("$.each($('[type=radio][name=filetype]:disabled'), function(_, e){ $(e).parent().parent().css('opacity', 0.4) })")
+    
+  }
+  
+  else if (input$DDA_DIA == "TMT") {
+    shinyjs::runjs("$('[type=radio][name=filetype]:disabled').parent().parent().parent().find('div.radio').css('opacity', 1)")
+    shinyjs::enable("filetype")
+    shinyjs::disable(selector = "[type=radio][value=sky]")
+    shinyjs::disable(selector = "[type=radio][value=prog]")
+    shinyjs::disable(selector = "[type=radio][value=spec]")
+    shinyjs::disable(selector = "[type=radio][value=open]")
+    shinyjs::disable(selector = "[type=radio][value=ump]")
     shinyjs::runjs("$.each($('[type=radio][name=filetype]:disabled'), function(_, e){ $(e).parent().parent().css('opacity', 0.4) })")
     
   }
@@ -38,7 +57,8 @@ get_annot = reactive({
   if(is.null(annot)) {
     return(NULL)
   }
-  read.csv(annot$datapath)
+  annot_file <- read.csv(annot$datapath)
+  return(annot_file)
 })
 
 get_annot1 = reactive({
@@ -131,9 +151,10 @@ get_data = reactive({
                                    removeProtein_with1Peptide=input$remove)
     }
     else if(input$filetype == 'prog') {
+      cat(file=stderr(), "Reached in prog\n")
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
       
-      mydata <- ProgenesistoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
+      mydata <- ProgenesistoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = TRUE)
       colnames(mydata)[colnames(mydata) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
     }
     else if(input$filetype == 'PD') {
@@ -203,8 +224,38 @@ output$summary <- renderTable(
   }, bordered = T
 )
 
+# get_summary1 <- reactive({
+#   req(get_data())
+#   df <- get_data()
+#   nf <- ifelse("Fraction" %in% colnames(df),n_distinct(df$Fraction),1)
+#   df1 <- df %>% summarise("Number of Conditions" = n_distinct(Condition),
+#                           "Number of Biological Replicates" = n_distinct(BioReplicate),
+#                           "Number_of_Fraction" = nf,
+#                           "Number of MS runs" = n_distinct(Run)
+#   )
+#   df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>% 
+#     select("Condition_Run")
+#   df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>% 
+#     select("BioReplicate_Run")
+#   df <- cbind(df1,df2,df3) %>% 
+#     mutate("Number of Technical Replicates" = Condition_Run/(BioReplicate_Run*Number_of_Fraction) ) %>%
+#     select(-Condition_Run,-BioReplicate_Run)
+#   
+#   df <- head(df,1) 
+#   df <- df[,c(1,2,5,3,4)]
+#   
+#   t_df <- as.data.frame(t(df))
+#   rownames(t_df) <- colnames(df)
+#   t_df <- cbind(rownames(t_df), t_df)
+#   colnames(t_df) <- c("", "value")
+#   t_df$value <- sub("\\.\\d+$", "", t_df$value)
+#   colnames(t_df) <- c("", "")
+#   return(t_df)
+# })
+
 output$summary1 <-  renderTable(
   {
+    #t_df <- get_summary1()
     req(get_data())
     df <- get_data()
     nf <- ifelse("Fraction" %in% colnames(df),n_distinct(df$Fraction),1)
@@ -212,7 +263,7 @@ output$summary1 <-  renderTable(
                             "Number of Biological Replicates" = n_distinct(BioReplicate),
                             "Number_of_Fraction" = nf,
                             "Number of MS runs" = n_distinct(Run)
-                            )
+    )
     df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>% 
       select("Condition_Run")
     df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>% 
@@ -234,6 +285,45 @@ output$summary1 <-  renderTable(
   }, bordered = T
 )
 
+# get_summary2 <- reactive({
+#   req(get_data())
+#   df <- get_data()
+#   df <- df %>% mutate("FEATURES" = paste(PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, sep = '_'))
+#   
+#   df1 <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
+#                           "Number of Peptides" = n_distinct(PeptideSequence),
+#                           "Number of Features" = n_distinct(FEATURES),
+#                           "Min_Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,min(Intensity, na.rm=T)),
+#                           "Max_Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
+#                                                    max(Intensity, na.rm=T))) %>%
+#     unite("Intensity", Min_Intensity:Max_Intensity, sep = " - ")
+#   
+#   Peptides_Proteins <- df %>% group_by(ProteinName)  %>%
+#     summarise(npep = n_distinct(PeptideSequence)) %>% summarize(Peptides_Proteins_min=min(npep),
+#                                                                 Peptides_Proteins_max=max(npep))
+#   
+#   Features_Peptides <- df %>% group_by(PeptideSequence)  %>%
+#     summarise(nfea = n_distinct(FEATURES)) %>% summarize(Features_Peptides_min=min(nfea),
+#                                                          Features_Peptides_max=max(nfea))
+#   
+#   df1 <- cbind(df1,Features_Peptides,Peptides_Proteins) %>%
+#     unite("Number of Features/Peptide",Features_Peptides_min:Features_Peptides_max,sep = " - ") %>%
+#     unite("Number of Peptides/Protein",Peptides_Proteins_min:Peptides_Proteins_max, sep = " - ")
+#   
+#   df1 <- df1[,c(1,2,3,6,5,4)]
+#   
+#   t_df <- as.data.frame(t(df1))
+#   rownames(t_df) <- colnames(df1)
+#   t_df <- cbind(rownames(t_df), t_df)
+#   
+#   colnames(t_df) <- c("", "value")
+#   t_df$value <- sub("\\.\\d+$", "", t_df$value)
+#   
+#   colnames(t_df) <- c("", "")
+#   return(t_df)
+#   
+# })
+
 output$summary2 <-  renderTable(
   {
     req(get_data())
@@ -241,12 +331,12 @@ output$summary2 <-  renderTable(
     df <- df %>% mutate("FEATURES" = paste(PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, sep = '_'))
     
     df1 <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
-                                   "Number of Peptides" = n_distinct(PeptideSequence),
-                                   "Number of Features" = n_distinct(FEATURES),
-                                   "Min_Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,min(Intensity, na.rm=T)),
-                                   "Max_Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
-                                                            max(Intensity, na.rm=T))) %>%
-      unite("Range of intensity", Min_Intensity:Max_Intensity, sep = " - ")
+                            "Number of Peptides" = n_distinct(PeptideSequence),
+                            "Number of Features" = n_distinct(FEATURES),
+                            "Min_Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,min(Intensity, na.rm=T)),
+                            "Max_Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
+                                                     max(Intensity, na.rm=T))) %>%
+      unite("Intensity", Min_Intensity:Max_Intensity, sep = " - ")
     
     Peptides_Proteins <- df %>% group_by(ProteinName)  %>%
       summarise(npep = n_distinct(PeptideSequence)) %>% summarize(Peptides_Proteins_min=min(npep),
@@ -257,20 +347,68 @@ output$summary2 <-  renderTable(
                                                            Features_Peptides_max=max(nfea))
     
     df1 <- cbind(df1,Features_Peptides,Peptides_Proteins) %>%
-      unite("Range of Features/Peptide",Features_Peptides_min:Features_Peptides_max,sep = " - ") %>%
-      unite("Range of Peptides/Protein",Peptides_Proteins_min:Peptides_Proteins_max, sep = " - ")
+      unite("Number of Features/Peptide",Features_Peptides_min:Features_Peptides_max,sep = " - ") %>%
+      unite("Number of Peptides/Protein",Peptides_Proteins_min:Peptides_Proteins_max, sep = " - ")
     
     df1 <- df1[,c(1,2,3,6,5,4)]
-
+    
     t_df <- as.data.frame(t(df1))
     rownames(t_df) <- colnames(df1)
     t_df <- cbind(rownames(t_df), t_df)
-
+    
     colnames(t_df) <- c("", "value")
     t_df$value <- sub("\\.\\d+$", "", t_df$value)
     
     colnames(t_df) <- c("", "")
+    
+    #t_df <- get_summary2()
     t_df
+    
   }, bordered = T, align='lr'
 )
+
+shinyjs::enable("proceed1")
+shinyjs::enable("reset1")
+# observeEvent(get_data(),{
+#   shinyjs::enable("proceed1")
+# })
+# 
+# observeEvent(get_data(),{
+#   shinyjs::enable("reset1")
+# })
+
+onclick("proceed2", {
+  updateTabsetPanel(session = session, inputId = "tablist", selected = "DataProcessing")
+})
+
+onclick("reset1", {
+  shinyjs::runjs("location.reload()")
+  updateTabsetPanel(session = session, inputId = "tablist", selected = "Uploaddata")
+})
+
+output$summary_tables <- renderUI({
+  
+  tagList(conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                           tags$br(),
+                           tags$h4("Calculation in progress...")),
+          tags$head(
+            tags$style(HTML('#proceed2{background-color:orange}'))
+          ),
+          actionButton(inputId = "proceed2", label = "Next Step"),
+          h4("Summary of experimental design"),
+          column(width=12, tableOutput('summary1'), style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
+          tags$br(),
+          h4("Summary of dataset"),
+          column(width=12, tableOutput("summary2"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"),
+          h4("Top 6 rows of the dataset"),
+          column(width=12, tableOutput("summary"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"))
+
+})
+
+onclick("proceed1", {
+  shinyjs::show("summary_tables")
+})
+
+
+
 

@@ -44,6 +44,15 @@ shinyServer(function(input, output, session) {
     updateTabsetPanel(session = session, inputId = "tablist", selected = "Uploaddata")
   })
   
+  onclick("reset1", {
+    shinyjs::runjs("location.reload()")
+  })
+  
+  observeEvent(input$proceed1, {
+    updateTabsetPanel(session = session, inputId = "tablist", selected = "Uploaddata")
+  })
+  
+  
   source("panels/utils.R", local = T)
   # data preprocessing
   source("panels/qc-server.R", local = T)
@@ -59,6 +68,11 @@ shinyServer(function(input, output, session) {
   source("panels/expdes-server.R", local = T)
   # report
   source("panels/report-server.R", local = T)
+ 
+  observe({
+    currentTab <<- input$tablist
+    updateTabsetPanel(session = session, inputId = "tablist", selected = currentTab)
+  })
 
 }
 )

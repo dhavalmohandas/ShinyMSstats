@@ -1,11 +1,14 @@
 ##### sidebar #####
 
 sbp_load = sidebarPanel(
-  
+  tags$head(
+    tags$style(HTML('#proceed1{background-color:orange}')),
+    tags$style(HTML('#reset1{background-color:orange}')),
+  ),
   # selection for DIA DDA or SRM/PRM
   
   radioButtons("DDA_DIA",
-               label = h4("Type of Acquisition", tipify(icon("question-circle"), 
+               label = h4("1. Type of Acquisition", tipify(icon("question-circle"), 
                                                         title = "Select if the acquisition was Data Independent, 
                                                         Data Dependent or Selected/Parallel Reaction Monitoring")),
                c("DDA" = "DDA", "DIA" = "DIA", "SRM/PRM" = "SRM_PRM", "TMT"="TMT")),
@@ -13,20 +16,20 @@ sbp_load = sidebarPanel(
   # upload  
   
   radioButtons("filetype",
-               label = h4("Type of File", tipify(icon("question-circle"), 
+               label = h4("2. Type of File", tipify(icon("question-circle"), 
                                                  title = "Choose input type: sample dataset, classical 10-column dataset, 
                                                  or outputs from Skyline, MaxQuant, Progenesis or Proteome Discoverer")),
-               choices = c("sample dataset" = "sample", "10 column dataset" = "10col", 
+               choices = c("sample dataset" = "sample", "MSstats required format" = "10col", 
                            "Skyline" = "sky", "MaxQuant" = "maxq", "Progenesis" = "prog", 
-                           "Proteome Discoverer" = "PD", "Spectronaut" = "spec", 
-                           "OpenSWATH" = "open"), selected = character(0)),
+                           "Proteome Discoverer" = "PD", "OpenMS" = "openms", "Spectronaut" = "spec", 
+                           "OpenSWATH" = "open", "DIA-Umpire" = "ump", "Spectro Mine" = "spmin"), selected = character(0)),
   tags$hr(),
   conditionalPanel(condition = "input.filetype =='10col' || input.filetype =='prog' || input.filetype =='PD' || input.filetype =='open'",
-                   h4("Upload quantification dataset")),
+                   h4("3. Upload quantification dataset")),
   conditionalPanel(condition = "input.filetype == 'sky'",
-                   h4("Upload MSstats report from Skyline")),
+                   h4("3. Upload MSstats report from Skyline")),
   conditionalPanel(condition = "input.filetype == 'spec'",
-                   h4("Upload MSstats scheme output from Spectronaut")),
+                   h4("3. Upload MSstats scheme output from Spectronaut")),
   conditionalPanel(condition = "input.filetype && input.filetype != 'maxq' && input.filetype != 'sample'",
                    fileInput('data', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
                    radioButtons("sep",
@@ -36,22 +39,24 @@ sbp_load = sidebarPanel(
   tags$br(),
   conditionalPanel(
     condition = "input.filetype == 'sky' || input.filetype == 'prog' || input.filetype == 'PD' || input.filetype == 'spec' || input.filetype == 'open' ",
-    h4("Upload annotation File"),
-    fileInput('annot', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-    downloadLink("template", "Open annotation file template")
+    h4("4. Upload annotation File"),
+    downloadLink("template", "Annotation file template"),
+    fileInput('annot', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
   ),
   tags$br(),
   conditionalPanel(
     condition = "input.filetype == 'maxq'",
-    h4("Upload evidence.txt File"),
+    h4("4. Upload evidence.txt File"),
     fileInput('evidence', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-    h4("Upload proteinGroups.txt File"),
+    h4("5. Upload proteinGroups.txt File"),
     fileInput('pGroup', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-    h4("Upload annotation File"),
+    h4("6. Upload annotation File"),
     fileInput('annot1', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
   ),
   tags$hr(),
   conditionalPanel(condition = "input.filetype && input.DDA_DIA == 'DDA' && input.filetype !== 'sample'",
+                   h4("Select the options for pre-processing"),
+                   checkboxInput("uniqe_peptides", "Use unique peptides", value = TRUE),
                    checkboxInput("remove", "Remove proteins with 1 peptide and charge", value = FALSE)),
   conditionalPanel(condition = "input.filetype && input.DDA_DIA == 'DIA' && input.filetype !== 'sample'",
                    checkboxInput("remove", "Remove proteins with 1 feature", value = FALSE),
@@ -63,15 +68,21 @@ sbp_load = sidebarPanel(
                                     checkboxInput("m_score", "Filter with M-score"),
                                     conditionalPanel(condition = "input.m_score",
                                                      numericInput("m_cutoff", "M-score cutoff", 0.01, 0, 1, 0.01)))
-  )
+  ),
+  disabled(actionButton(inputId = "proceed1", label = "Next")),
+  disabled(actionButton(inputId = "reset1", label = "Reset"))
 )
 
 ##########################################
 
 loadpage = fluidPage(
+  useShinyjs(),
   headerPanel("Upload data"),
-  p("Use this page to upload your data or choose the sample dataset to explore the application.  For more information on the type of dataset accepted by Shiny-MSstats please click",
-    a("here", href="https://bioconductor.org/packages/devel/bioc/vignettes/MSstats/inst/doc/MSstats.html", target="_blank")),
+  p("To explore this application for 'Type of File' upload two types of datasets:"),
+  p("(1) Quantification report from data processing tool."), 
+  p("(2) Annotation including experimental design."),
+  p("For more information on the type of dataset accepted by Shiny-MSstats please check the ",
+    a("documentation.", href="https://bioconductor.org/packages/devel/bioc/vignettes/MSstats/inst/doc/MSstats.html", target="_blank")),
   tags$br(),
   conditionalPanel(
     condition = "input.filetype == 'sample' && input.DDA_DIA == 'DDA'",
@@ -90,16 +101,7 @@ loadpage = fluidPage(
   tags$br(),
   sbp_load,
   column(width = 8,
-         h4("Summary of experimental design"),
-         conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                          tags$br(),
-                          tags$h4("Calculation in progress...")),
-         column(width=12, tableOutput('summary1'), style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
-         tags$br(),
-         h4("Summary of dataset"),
-         column(width=12, tableOutput("summary2"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"),
-         h4("Top 6 rows of the dataset"),
-         column(width=12, tableOutput("summary"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;")
+         shinyjs::hidden(uiOutput("summary_tables"))
          
   )
 )

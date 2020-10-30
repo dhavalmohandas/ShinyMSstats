@@ -14,6 +14,7 @@ main = mainPanel(
                         )
                       )
                ),
+               column(7,actionButton(inputId = "proceed4", label = "Next Step")),
                column(7,
                       h4("Table of abundance"),
                       dataTableOutput("abundance")
@@ -24,6 +25,8 @@ main = mainPanel(
 )
 
 pq = fluidPage(
+  tags$style(HTML('#proceed4{float:right;}')),
+  tags$style(HTML('#proceed4{background-color:orange}')),
   headerPanel("Protein Quantification"),
   p("Quantification of the proteins after preprocessing."),
   p("PLEASE COMPLETE DATA PROCESSING STEP"),

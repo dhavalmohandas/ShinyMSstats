@@ -64,12 +64,22 @@ observe ({
   shinyjs::toggleState("n_feat", input$all_feat == FALSE)
 })
 
+# features <- function() {
+#   if (input$all_feat == FALSE) {
+#     n_feat <- "topN"
+#   }
+#   else {
+#     n_feat <- "all"
+#   }
+#   return(n_feat)
+# }
+
 features <- function() {
-  if (input$all_feat == FALSE) {
-    n_feat <- "topN"
+  if (input$features_used == "all_feat") {
+    n_feat <- "n_feat"
   }
   else {
-    n_feat <- "all"
+    n_feat <- "all_feat"
   }
   return(n_feat)
 }
