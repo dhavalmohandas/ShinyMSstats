@@ -1,4 +1,4 @@
-
+options(shiny.maxRequestSize=2000*1024^2)
 library(shiny)
 library(MSstats)
 library(shinyBS)
