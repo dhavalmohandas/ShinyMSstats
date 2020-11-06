@@ -72,6 +72,17 @@ get_annot1 = reactive({
   
 })
 
+get_annot2 = reactive({
+  annot1 <- input$annot2
+  if(is.null(input$annot2)) {
+    return(NULL)
+  }
+  annot2<-read.csv(annot1$datapath, header = T)
+  cat(file=stderr(), "Reached in ump annot\n")
+  return(annot2)
+  
+})
+
 get_evidence = reactive({
   evidence <- input$evidence
   if(is.null(input$evidence)) {
@@ -93,10 +104,48 @@ get_proteinGroups = reactive({
   return(pGroup)
 })
 
+get_FragSummary = reactive({
+  fragSummary <- input$fragSummary
+  if(is.null(input$fragSummary)) {
+    return(NULL)
+  }
+  fragSummary <- read.table(fragSummary$datapath, sep="\t", header=TRUE)
+  return(fragSummary)
+  
+})
+
+get_peptideSummary = reactive({
+  peptideSummary <- input$peptideSummary
+  if(is.null(input$peptideSummary)) {
+    return(NULL)
+  }
+  peptideSummary <- read.table(peptideSummary$datapath, sep="\t", header=TRUE)
+  return(peptideSummary)
+  
+})
+
+get_protSummary = reactive({
+  protSummary <- input$protSummary
+  if(is.null(input$protSummary)) {
+    return(NULL)
+  }
+  protSummary <- read.table(protSummary$datapath, sep="\t", header=TRUE)
+  return(protSummary)
+  
+})
+
+
 get_data = reactive({
+  
   ev_maxq <- get_evidence()
   pg_maxq <- get_proteinGroups()
   an_maxq <- get_annot1()
+  
+  raw.frag <- get_FragSummary()
+  raw.pep <- get_peptideSummary()
+  raw.pro <- get_protSummary()
+  annot2 <- get_annot2()
+  
   cat(file=stderr(), "Reached in get_data\n")
   
   cat(file=stderr(), paste("File type is",input$filetype,"\n"))
@@ -107,25 +156,33 @@ get_data = reactive({
      if(input$DDA_DIA == "SRM_PRM") {
        mydata <- SRM_yeast
      }
-#     else if(input$DDA_DIA == "DDA") {
- #      mydata <- DDARawData
-#     }
+    else if(input$DDA_DIA == "DDA") {
+     mydata <- DDARawData
+    }
      else if(input$DDA_DIA == "DIA")
     mydata <- read.csv("dataset.csv", header = T, sep = ";")
     }
   else {
     infile <- input$data
     
-    if(input$filetype!='maxq'){
-      if(is.null(infile)) {
-        return(NULL)
-      }
-    }
-    else{
+    if(input$filetype=='maxq'){
       if(is.null(ev_maxq) || is.null(pg_maxq) || is.null(an_maxq) ) {
         return(NULL)
       }
+    }
+    else if(input$filetype=='ump'){
       
+      if(is.null(raw.frag) || is.null(raw.pep) || is.null(raw.pro) || is.null(annot2)) {
+        return(NULL)
+      }
+      
+
+    }
+    
+    else {
+      if(is.null(infile)) {
+        return(NULL)
+      }
     }
     
     
@@ -136,7 +193,7 @@ get_data = reactive({
       cat(file=stderr(), "Reached here in skyline\n")
       data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
       
-      if(input$DDA_DIA=="DDA"){
+      if(input$DDA_DIA=="DDA" ){
         data <- data[which(data$Fragment.Ion %in% c( "precursor", "precursor [M+1]","precursor [M+2]")), ]
         
         mydata <- SkylinetoMSstatsFormat(data,
@@ -144,7 +201,7 @@ get_data = reactive({
                                          fewMeasurements="remove",
                                          removeProtein_with1Feature = input$remove)
       }
-      else if(input$DDA_DIA=="DIA"){
+      else if(input$DDA_DIA=="DIA" || input$DDA_DIA=="SRM_PRM"){
         mydata <- SkylinetoMSstatsFormat(data,
                                         annotation = get_annot(),
                                         filter_with_Qvalue = TRUE, 
@@ -192,13 +249,24 @@ get_data = reactive({
                                filter_with_mscore = TRUE, ## same as default
                                mscore_cutoff = 0.01, ## same as default
                                fewMeasurements="remove",
-                               removeProtein_with1Feature = input$remove)
+                               removeProtein_with1Feature = TRUE)
+      cat(file=stderr(), "Reached in openSwath\n")
     }
     else if(input$filetype == 'openms') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep)
       unique(data[, c('Run', 'BioReplicate', 'Condition')])
       mydata <-OpenMStoMSstatsFormat(data,
                             removeProtein_with1Feature=TRUE)
+    }
+    else if(input$filetype == 'ump') {
+      #data <- read.csv(infile$datapath, header = T, sep = input$sep)
+      #unique(data[, c('Run', 'BioReplicate', 'Condition')])
+      mydata <- DIAUmpiretoMSstatsFormat(raw.frag, raw.pep, raw.pro,
+                                                 annot2,
+                                                 useSelectedFrag = TRUE,
+                                                 useSelectedPep = FALSE,
+                                                 fewMeasurements="remove",
+                                                 removeProtein_with1Feature = TRUE)
     }
     }
   mydata <- unique(data.frame(mydata))

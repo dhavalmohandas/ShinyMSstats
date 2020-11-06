@@ -30,7 +30,7 @@ sbp_load = sidebarPanel(
                    h4("3. Upload MSstats report from Skyline")),
   conditionalPanel(condition = "input.filetype == 'spec'",
                    h4("3. Upload MSstats scheme output from Spectronaut")),
-  conditionalPanel(condition = "input.filetype && input.filetype != 'maxq' && input.filetype != 'sample'",
+  conditionalPanel(condition = "input.filetype && input.filetype != 'maxq' && input.filetype != 'sample' && input.filetype != 'ump'",
                    fileInput('data', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
                    radioButtons("sep",
                                 label = h5("Column separator in uploaded file",tipify(icon("question-circle"), 
@@ -52,6 +52,17 @@ sbp_load = sidebarPanel(
     fileInput('pGroup', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
     h4("6. Upload annotation File"),
     fileInput('annot1', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
+  ),
+  conditionalPanel(
+    condition = "input.filetype == 'ump'",
+    h4("4. Upload FragSummary.xls File"),
+    fileInput('fragSummary', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
+    h4("5. Upload PeptideSummary.xls File"),
+    fileInput('peptideSummary', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
+    h4("6. Upload ProtSummary.xls File"),
+    fileInput('protSummary', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
+    h4("7. Upload Annotation File"),
+    fileInput('annot2', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
   ),
   tags$hr(),
   conditionalPanel(condition = "input.filetype && input.DDA_DIA == 'DDA' && input.filetype !== 'sample'",
