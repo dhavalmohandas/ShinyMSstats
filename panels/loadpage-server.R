@@ -214,11 +214,20 @@ get_data = reactive({
     }
     else if(input$filetype == 'maxq') {
       cat(file=stderr(), "Reached in maxq\n")
+      if(input$DDA_DIA=="TMT"){
+        mydata <- PDtoMSstatsTMTFormat(input = raw, 
+                                       annotation = annotation,
+                                       which.proteinid = "Protein.Accessions" ## same as default
+        )
+        
+      }
+      else{
+        mydata <- MaxQtoMSstatsFormat(evidence= ev_maxq, annotation= an_maxq, proteinGroups= pg_maxq,
+                                      useUniquePeptide = TRUE,
+                                      summaryforMultipleRows = max,
+                                      removeProtein_with1Peptide=input$remove)
+      }
       
-      mydata <- MaxQtoMSstatsFormat(evidence= ev_maxq, annotation= an_maxq, proteinGroups= pg_maxq,
-                                   useUniquePeptide = TRUE,
-                                   summaryforMultipleRows = max,
-                                   removeProtein_with1Peptide=input$remove)
     }
     else if(input$filetype == 'prog') {
       cat(file=stderr(), "Reached in prog\n")
@@ -228,9 +237,20 @@ get_data = reactive({
       colnames(mydata)[colnames(mydata) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
     }
     else if(input$filetype == 'PD') {
-      data <- read.csv(infile$datapath, header = T, sep = input$sep)
-      mydata <- PDtoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
-      colnames(mydata)[colnames(mydata) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
+      
+      if(input$DDA_DIA=="TMT"){
+        data <- read.delim(infile$datapath)
+        mydata <- PDtoMSstatsTMTFormat(input = data, 
+                                       annotation = get_annot(),
+                                       which.proteinid = "Protein.Accessions" ## same as default
+        )
+      }
+      else{
+        data <- read.csv(infile$datapath, header = T, sep = input$sep, stringsAsFactors=F)
+        mydata <- PDtoMSstatsFormat(data, annotation = get_annot(), removeProtein_with1Peptide = input$remove)
+        colnames(mydata)[colnames(mydata) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
+      }
+      
     }
     else if(input$filetype == 'spec') {
       data <- read.csv(infile$datapath, header = T, sep = input$sep)
@@ -253,10 +273,19 @@ get_data = reactive({
       cat(file=stderr(), "Reached in openSwath\n")
     }
     else if(input$filetype == 'openms') {
-      data <- read.csv(infile$datapath, header = T, sep = input$sep)
-      unique(data[, c('Run', 'BioReplicate', 'Condition')])
-      mydata <-OpenMStoMSstatsFormat(data,
-                            removeProtein_with1Feature=TRUE)
+      if(input$DDA_DIA=="TMT"){
+        data <- read.csv(infile$datapath, header = T, sep = input$sep)
+        mydata <- OpenMStoMSstatsTMTFormat(data)
+        
+      }
+      else{
+        data <- read.csv(infile$datapath, header = T, sep = input$sep)
+        unique(data[, c('Run', 'BioReplicate', 'Condition')])
+        mydata <-OpenMStoMSstatsFormat(data,
+                                       removeProtein_with1Feature=TRUE)
+        
+      }
+      
     }
     else if(input$filetype == 'ump') {
       #data <- read.csv(infile$datapath, header = T, sep = input$sep)
@@ -267,6 +296,10 @@ get_data = reactive({
                                                  useSelectedPep = FALSE,
                                                  fewMeasurements="remove",
                                                  removeProtein_with1Feature = TRUE)
+    }
+    else if(input$filetype == 'spmin') {
+      data <- read.csv(infile$datapath, header = T, sep="\t")
+      mydata <- SpectroMinetoMSstatsTMTFormat(data, get_annot())
     }
     }
   mydata <- unique(data.frame(mydata))
@@ -314,7 +347,6 @@ output$summary <- renderTable(
 
 output$summary1 <-  renderTable(
   {
-    #t_df <- get_summary1()
     req(get_data())
     df <- get_data()
     nf <- ifelse("Fraction" %in% colnames(df),n_distinct(df$Fraction),1)
@@ -323,16 +355,20 @@ output$summary1 <-  renderTable(
                             "Number_of_Fraction" = nf,
                             "Number of MS runs" = n_distinct(Run)
     )
-    df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>% 
+    df2 <- df %>% group_by(Condition, Run) %>% summarise("Condition_Run" = n()) %>% ungroup() %>%
       select("Condition_Run")
-    df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>% 
+    df3 <- df %>% group_by(Run, BioReplicate) %>% summarise("BioReplicate_Run" = n()) %>% ungroup() %>%
       select("BioReplicate_Run")
-    df <- cbind(df1,df2,df3) %>% 
+    
+    df1 <- head(df1,1)
+    df2 <- head(df2,1)
+    df3 <- head(df3,1)
+    
+    df <- cbind(df1,df2,df3) %>%
       mutate("Number of Technical Replicates" = Condition_Run/(BioReplicate_Run*Number_of_Fraction) ) %>%
       select(-Condition_Run,-BioReplicate_Run)
-    
-    df <- head(df,1) 
     df <- df[,c(1,2,5,3,4)]
+ 
     
     t_df <- as.data.frame(t(df))
     rownames(t_df) <- colnames(df)
@@ -348,7 +384,15 @@ output$summary2 <-  renderTable(
   {
     req(get_data())
     df <- get_data()
-    df <- df %>% mutate("FEATURES" = paste(PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, sep = '_'))
+    if(input$DDA_DIA=="TMT"){
+      df <- df %>% mutate("FEATURES" = paste(ProteinName, PeptideSequence, Charge, sep = '_'))
+    }
+    else{
+      df <- df %>% mutate("FEATURES" = paste(PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, sep = '_'))
+      
+    }
+    
+    
     
     df1 <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
                             "Number of Peptides" = n_distinct(PeptideSequence),

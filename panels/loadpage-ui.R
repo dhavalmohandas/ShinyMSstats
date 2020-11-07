@@ -24,7 +24,8 @@ sbp_load = sidebarPanel(
                            "Proteome Discoverer" = "PD", "OpenMS" = "openms", "Spectronaut" = "spec", 
                            "OpenSWATH" = "open", "DIA-Umpire" = "ump", "Spectro Mine" = "spmin"), selected = character(0)),
   tags$hr(),
-  conditionalPanel(condition = "input.filetype =='10col' || input.filetype =='prog' || input.filetype =='PD' || input.filetype =='open'|| input.filetype =='openms'",
+  conditionalPanel(condition = "input.filetype =='10col' || input.filetype =='prog' || input.filetype =='PD' || input.filetype =='open'||
+                   input.filetype =='openms'|| input.filetype =='spmin'",
                    h4("3. Upload quantification dataset")),
   conditionalPanel(condition = "input.filetype == 'sky'",
                    h4("3. Upload MSstats report from Skyline")),
@@ -38,7 +39,7 @@ sbp_load = sidebarPanel(
                                 c(Comma=",",Semicolon=";", Tab="\t",Pipe="|"), inline = T)),
   tags$br(),
   conditionalPanel(
-    condition = "input.filetype == 'sky' || input.filetype == 'prog' || input.filetype == 'PD' || input.filetype == 'spec' || input.filetype == 'open' ",
+    condition = "input.filetype == 'sky' || input.filetype == 'prog' || input.filetype == 'PD' || input.filetype == 'spec' || input.filetype == 'open'|| input.filetype =='spmin' ",
     h4("4. Upload annotation File"),
     downloadLink("template", "Annotation file template"),
     fileInput('annot', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
