@@ -286,7 +286,7 @@ output$matrix <- renderUI({
 
 output$table <-  renderTable({
   matrix_build()
-}, rownames = T)
+}, rownames = T, bordered = T)
 
 # table of significant proteins
 

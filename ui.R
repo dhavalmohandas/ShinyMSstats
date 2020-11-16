@@ -1,5 +1,5 @@
 rm(list=setdiff(ls(), 'currentTab'))
-options(shiny.autoreload = TRUE)
+#options(shiny.autoreload = TRUE)
 library(shiny)
 library(shinyBS)
 library(shinyjs)
@@ -10,8 +10,7 @@ library(data.table)
 library(MSstatsTMT)
 
 if (FALSE) require("V8")
-#library(MSnbase)
-
+library(MSnbase)
 
 #####################################
 
@@ -61,7 +60,8 @@ source("panels/home-ui.R", local = T)
 source("panels/loadpage-ui.R", local = T)
 source("panels/qc-ui.R", local = T)
 source("panels/pq-ui.R", local = T)
-source("panels/statmodel-ui.R", local = T)
+#source("panels/statmodel-ui.R", local = T)
+
 source("panels/expdes-ui.R", local = T)
 #source("panels/analysis-ui.R", local = T)
 #source("panels/clust-ui.R", local = T)
@@ -100,12 +100,6 @@ color: black !important;
 }
 "
 
-
-
-if(!exists('currentTab')){
-  currentTab <- "Homepage"
-}
-
 ui <- navbarPage(
   title = "MSstats-Shiny",
   id = "tablist",
@@ -128,7 +122,7 @@ ui <- navbarPage(
   tabPanel("Upload data",value = "Uploaddata", icon = icon("send"), loadpage),
   tabPanel("Data Processing",value = "DataProcessing", icon = icon("gears"), qc),
   tabPanel("Protein Quantification", value = "PQ",icon = icon("calculator"), pq),
-  tabPanel("Statistical Model", value = "StatsModel", icon = icon("magic"), statmodel),
+  tabPanel("Statistical Model", value = "StatsModel", icon = icon("magic"), uiOutput("statmodel")),
 #  tabPanel("Functional Analysis", icon = icon("bar-chart"), analysis),
 #  tabPanel("Clustering/Classification", icon = icon("puzzle-piece"), clust),
   tabPanel("Future Experiments", icon = icon("flask"), expdes),
