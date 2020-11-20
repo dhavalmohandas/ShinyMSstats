@@ -60,7 +60,7 @@ source("panels/home-ui.R", local = T)
 source("panels/loadpage-ui.R", local = T)
 source("panels/qc-ui.R", local = T)
 source("panels/pq-ui.R", local = T)
-#source("panels/statmodel-ui.R", local = T)
+source("panels/statmodel-ui.R", local = T)
 
 source("panels/expdes-ui.R", local = T)
 #source("panels/analysis-ui.R", local = T)
@@ -122,7 +122,7 @@ ui <- navbarPage(
   tabPanel("Upload data",value = "Uploaddata", icon = icon("send"), loadpage),
   tabPanel("Data Processing",value = "DataProcessing", icon = icon("gears"), qc),
   tabPanel("Protein Quantification", value = "PQ",icon = icon("calculator"), pq),
-  tabPanel("Statistical Model", value = "StatsModel", icon = icon("magic"), uiOutput("statmodel")),
+  tabPanel("Statistical Model", value = "StatsModel", icon = icon("magic"), statmodel),
 #  tabPanel("Functional Analysis", icon = icon("bar-chart"), analysis),
 #  tabPanel("Clustering/Classification", icon = icon("puzzle-piece"), clust),
   tabPanel("Future Experiments", icon = icon("flask"), expdes),

@@ -201,7 +201,7 @@ get_data = reactive({
                                          fewMeasurements="remove",
                                          removeProtein_with1Feature = input$remove)
       }
-      else if(input$DDA_DIA=="DIA" || input$DDA_DIA=="SRM_PRM"){
+      else if(input$DDA_DIA=="DIA"){
         mydata <- SkylinetoMSstatsFormat(data,
                                         annotation = get_annot(),
                                         filter_with_Qvalue = TRUE, 
@@ -210,15 +210,17 @@ get_data = reactive({
                                         removeProtein_with1Feature = TRUE)
         
       }
+      else if(input$DDA_DIA=="SRM_PRM") {
+        mydata <- data
+      }
       
     }
     else if(input$filetype == 'maxq') {
       cat(file=stderr(), "Reached in maxq\n")
       if(input$DDA_DIA=="TMT"){
-        mydata <- PDtoMSstatsTMTFormat(input = raw, 
-                                       annotation = annotation,
-                                       which.proteinid = "Protein.Accessions" ## same as default
-        )
+        mydata <- MaxQtoMSstatsTMTFormat(evidence=evi, 
+                                         annotation=annot.maxquant,
+                                         proteinGroups=proteinGroups)
         
       }
       else{

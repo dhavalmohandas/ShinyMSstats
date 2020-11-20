@@ -23,6 +23,7 @@ sbp_load = sidebarPanel(
                            "Skyline" = "sky", "MaxQuant" = "maxq", "Progenesis" = "prog", 
                            "Proteome Discoverer" = "PD", "OpenMS" = "openms", "Spectronaut" = "spec", 
                            "OpenSWATH" = "open", "DIA-Umpire" = "ump", "Spectro Mine" = "spmin"), selected = character(0)),
+  radioTooltip(id = "filetype", choice = "MRF", title = "check msstats.org to find the required format", placement = "right", trigger = "hover"),
   tags$hr(),
   conditionalPanel(condition = "input.filetype =='10col' || input.filetype =='prog' || input.filetype =='PD' || input.filetype =='open'||
                    input.filetype =='openms'|| input.filetype =='spmin'",
@@ -31,7 +32,7 @@ sbp_load = sidebarPanel(
                    h4("3. Upload MSstats report from Skyline")),
   conditionalPanel(condition = "input.filetype == 'spec'",
                    h4("3. Upload MSstats scheme output from Spectronaut")),
-  conditionalPanel(condition = "input.filetype && input.filetype != 'maxq' && input.filetype != 'sample' && input.filetype != 'ump'",
+  conditionalPanel(condition = "input.filetype && input.filetype != 'maxq' && input.filetype != 'sample' && input.filetype != 'ump' && input.filetype != 'MRF'",
                    fileInput('data', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
                    radioButtons("sep",
                                 label = h5("Column separator in uploaded file",tipify(icon("question-circle"), 
@@ -66,7 +67,7 @@ sbp_load = sidebarPanel(
     fileInput('annot2', "", multiple = F, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
   ),
   tags$hr(),
-  conditionalPanel(condition = "input.filetype && input.DDA_DIA == 'DDA' && input.filetype !== 'sample'",
+  conditionalPanel(condition = "input.filetype && input.DDA_DIA == 'DDA' && input.filetype !== 'sample' && input.filetype !== 'MRF'",
                    h4("Select the options for pre-processing"),
                    checkboxInput("uniqe_peptides", "Use unique peptides", value = TRUE),
                    checkboxInput("remove", "Remove proteins with 1 peptide and charge", value = FALSE)),

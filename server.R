@@ -69,8 +69,8 @@ shinyServer(function(input, output, session) {
   # report
   source("panels/report-server.R", local = T)
   
-  statmodel<- reactiveFileReader(1000, session, "panels/statmodel-ui.R", source)
-  output$statmodel <- renderUI(statmodel())
+  # statmodel<- reactiveFileReader(1000, session, "panels/statmodel-ui.R", source)
+  # output$statmodel <- renderUI(statmodel())
  
   observe({
     currentTab <<- input$tablist
