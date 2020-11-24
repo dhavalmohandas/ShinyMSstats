@@ -159,8 +159,16 @@ get_data = reactive({
     else if(input$DDA_DIA == "DDA") {
      mydata <- DDARawData
     }
-     else if(input$DDA_DIA == "DIA")
-    mydata <- read.csv("dataset.csv", header = T, sep = ";")
+     else if(input$DDA_DIA == "DIA"){
+       mydata <- read.csv("dataset.csv", header = T, sep = ";")
+     }
+    else if(input$DDA_DIA == "TMT"){
+      mydata <- PDtoMSstatsTMTFormat(input = MSstatsTMT::raw.pd, 
+                                     annotation = MSstatsTMT::annotation.pd,
+                                     which.proteinid = "Protein.Accessions" ## same as default
+      )
+    }
+    
     }
   else {
     infile <- input$data
@@ -218,9 +226,9 @@ get_data = reactive({
     else if(input$filetype == 'maxq') {
       cat(file=stderr(), "Reached in maxq\n")
       if(input$DDA_DIA=="TMT"){
-        mydata <- MaxQtoMSstatsTMTFormat(evidence=evi, 
-                                         annotation=annot.maxquant,
-                                         proteinGroups=proteinGroups)
+        mydata <- MaxQtoMSstatsTMTFormat(evidence=ev_maxq, 
+                                         annotation=an_maxq,
+                                         proteinGroups=pg_maxq)
         
       }
       else{

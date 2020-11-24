@@ -5,8 +5,9 @@ sbp_params = sidebarPanel(
   # transformation
   
   conditionalPanel(condition = "input.DDA_DIA == 'TMT'",
-                   radioButtons("pepLevel", label= h4("1. Peptide level normalization: global_norm parameter"),
-                                c(Yes = "yes", No= "no"))),
+                   h4("1. Peptide level normalization"),
+                   checkboxInput("global_norm_parameter", "Yes")),
+  
   conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
                    radioButtons("log", 
                                 label= h4("1. Log transformation", 
@@ -22,23 +23,12 @@ sbp_params = sidebarPanel(
                                label = h4("2. Summarization method: method parameter ", 
                                           tipify(icon("question-circle"), 
                                                  title = "Choose a normalisation method.  For more information visit the Help tab")), 
-                               c("MSstats" = "MSstats", "Tukey’s median polish" = "Tukey", "Log(Sum): " = "log"), 
+                               c("MSstats" = "msstats", "Tukey’s median polish" = "MedianPolish", "Log(Sum)" = "LogSum","Median" = "Median"), 
                                selected = "log")),
   
-  conditionalPanel(condition = "input.DDA_DIA == 'TMT' && input.summarization == 'MSstats'",
-                   radioButtons("MSstatsCensor", 
-                                label= h4("Choose", 
-                                          tipify(icon("question-circle"), 
-                                                 title = "Perform missing value imputation and Tukey’s median polish summarization for each MS run separately")), 
-                                c("Max quantile for censored" = "maxQuantileforCensored", 
-                                  "Model Based imputation" = "Mbimpute"
-                                  ))),
-  conditionalPanel(
-    condition = "input.DDA_DIA == 'TMT' && input.summarization == 'MSstats' && input.MSstatsCensor=='maxQuantileforCensored'",
-    h5("Max quantile for censored", tipify(icon("question-circle"), title = "Max quantile for censored")),
-    checkboxInput("null", "Do not apply cutoff"),
-    numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001)
-                   ),
+  conditionalPanel(condition = "input.DDA_DIA == 'TMT' && input.summarization == 'msstats'",
+                                checkboxInput("null", "Do not apply cutoff"),
+                                numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001)),
   
   #normalisation
   
@@ -54,11 +44,11 @@ sbp_params = sidebarPanel(
   conditionalPanel(
     condition = "input.DDA_DIA === 'TMT'",
     h4("3. Local protein normalization"),
-    checkboxInput("reference_norm_parameter", "Reference norm parameter"),
+    checkboxInput("reference_norm", "Reference norm parameter", value = T),
     tags$hr(),
-    h4("4. Set parameters"),
-    checkboxInput("reference_norm_parameter", "i) Remove normalization channel"),
-    checkboxInput("reference_norm_parameter", "ii) Remove empty channel"),
+    h4("4. Filtering"),
+    checkboxInput("remove_norm_channel", "Remove normalization channel", value = T),
+    checkboxInput("remove_empty_channel", "Remove empty channel",value = T),
     
   ),
  

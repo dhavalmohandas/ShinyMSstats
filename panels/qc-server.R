@@ -102,24 +102,40 @@ output$Which <- renderUI({
 preprocess_data = eventReactive(input$run, {
   validate(need(get_data(), 
                 message = "PLEASE UPLOAD DATASET OR SELECT SAMPLE"))
-  preprocessed <- dataProcess(raw=get_data(),
-                              logTrans=input$log,
-                              normalization=input$norm,
-                              nameStandards=input$names,
-                              #                              betweenRunInterferenceScore=input$interf, 
-                              #                              fillIncompleteRows=input$fill,
-                              featureSubset=features(),
-                              #                              remove_proteins_with_interference=input$interf,
-                              n_top_feature=input$n_feat,
-                              summaryMethod="TMP",
-                              #                              equalFeatureVar=input$equal,
-                              censoredInt=input$censInt,
-                              cutoffCensored=input$cutoff,
-                              MBimpute=input$MBi,
-                              maxQuantileforCensored=quantile(),
-                              remove50missing=input$remove50
-                              #                             skylineReport=input$report
-                              )
+  if(input$DDA_DIA == "TMT"){
+    
+    preprocessed <- proteinSummarization(data = get_data(), 
+                                         method = input$summarization,
+                                         reference_norm = input$reference_norm,
+                                         remove_norm_channel = input$remove_norm_channel,
+                                         remove_empty_channel = input$remove_empty_channel,
+                                         MBimpute = TRUE,
+                                         maxQuantileforCensored = NULL
+                                         )
+    
+  }
+  else{
+    preprocessed <- dataProcess(raw=get_data(),
+                                logTrans=input$log,
+                                normalization=input$norm,
+                                nameStandards=input$names,
+                                #                              betweenRunInterferenceScore=input$interf, 
+                                #                              fillIncompleteRows=input$fill,
+                                featureSubset=features(),
+                                #                              remove_proteins_with_interference=input$interf,
+                                n_top_feature=input$n_feat,
+                                summaryMethod="TMP",
+                                #                              equalFeatureVar=input$equal,
+                                censoredInt=input$censInt,
+                                cutoffCensored=input$cutoff,
+                                MBimpute=input$MBi,
+                                maxQuantileforCensored=quantile(),
+                                remove50missing=input$remove50
+                                #                             skylineReport=input$report
+    )
+    
+  }
+  
   return(preprocessed)
   })
 
@@ -139,28 +155,58 @@ plotresult <- function(saveFile, protein, summary, original) {
       return (path_id)
     }
     
-    plot <- dataProcessPlots(data = preprocess_data(),
-                             type=input$type,
-                             featureName = input$fname,
-                             ylimUp = F,
-                             ylimDown = F,
-                             scale = input$cond_scale,
-                             interval = input$interval,
-                             #              x.axis.size = input_xsize,
-                             #              y.axis.size = input_ysize,
-                             #              t.axis.size = input_tsize,
-                             #              text.angle = input_tangle,
-                             #              legend.size = input_legend,
-                             #              dot.size.profile = input_dot_prof,
-                             #              dot.size.condition = input_dot_cond,
-                             #              width = input_width,
-                             #              height = input_height,
-                             which.Protein = protein,
-                             originalPlot = original,
-                             summaryPlot = summary,
-                             save_condition_plot_result = FALSE,
-                             address = path()
-    )
+    if(input$DDA_DIA == "TMT"){
+      
+      dataProcessPlotsTMT(get_data(),
+                          preprocess_data(),
+                          type=input$type,
+                          ylimUp = FALSE,
+                          ylimDown = FALSE,
+                          # x.axis.size = 10,
+                          # y.axis.size = 10,
+                          # text.size = 4,
+                          # text.angle = 90,
+                          # legend.size = 7,
+                          # dot.size.profile = 2,
+                          # ncol.guide = 5,
+                          # width = 10,
+                          # height = 10,
+                          which.Protein = protein,
+                          originalPlot = TRUE,
+                          summaryPlot = TRUE,
+                          address = path()
+      )
+      
+    }
+    
+    else{
+      
+      plot <- dataProcessPlots(data = preprocess_data(),
+                               type=input$type,
+                               featureName = input$fname,
+                               ylimUp = F,
+                               ylimDown = F,
+                               scale = input$cond_scale,
+                               interval = input$interval,
+                               #              x.axis.size = input_xsize,
+                               #              y.axis.size = input_ysize,
+                               #              t.axis.size = input_tsize,
+                               #              text.angle = input_tangle,
+                               #              legend.size = input_legend,
+                               #              dot.size.profile = input_dot_prof,
+                               #              dot.size.condition = input_dot_cond,
+                               #              width = input_width,
+                               #              height = input_height,
+                               which.Protein = protein,
+                               originalPlot = original,
+                               summaryPlot = summary,
+                               save_condition_plot_result = FALSE,
+                               address = path()
+      )
+      
+    }
+    
+    
     if (saveFile) {
       return(id_address)
     } 
@@ -207,7 +253,10 @@ observeEvent(input$run, {
            where = "afterEnd",
            ui= tags$div(tags$br(),
                         downloadButton("prepr_csv","Download .csv of preprocessed data"),
-                        downloadButton("summ_csv","Download .csv of summarised data")
+                        conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
+                                         downloadButton("summ_csv","Download .csv of summarised data")
+                                         )
+
            )
   )
 })
@@ -219,7 +268,16 @@ output$prepr_csv <- downloadHandler(
     paste("Preprocessed_data-", Sys.Date(), ".csv", sep="")
   },
   content = function(file) {
-    write.csv(preprocess_data()$ProcessedData, file, row.names = F)
+    if(input$DDA_DIA=='TMT'){
+      
+      write.csv(preprocess_data(), file, row.names = F)
+      
+    }
+    else{
+      
+      write.csv(preprocess_data()$ProcessedData, file, row.names = F)
+    }
+    
   }
 )
 
