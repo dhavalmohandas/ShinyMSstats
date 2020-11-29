@@ -2,7 +2,16 @@
 
 # choices of groups for contrast matrix
 
-choices <- reactive({levels(preprocess_data()$ProcessedData$GROUP_ORIGINAL)})
+choices <- reactive({
+  if(input$DDA_DIA=="TMT"){
+    levels(preprocess_data()$Condition)
+    
+  }
+  else{
+    levels(preprocess_data()$ProcessedData$GROUP_ORIGINAL)
+  }
+  
+})
 row <- reactive({rep(0, length(choices()))})
 contrast <- reactiveValues()
 comp_list <- reactiveValues()
@@ -39,7 +48,7 @@ output$WhichProt <- renderUI ({
 
 output$WhichProt1 <- renderUI ({
   selectizeInput("whichProt1",
-              label = h4("which protein to plot"), c("", unique(get_data()[1])))
+                 label = h4("which protein to plot"), c("", unique(get_data()[1])))
 })
 
 
@@ -124,14 +133,20 @@ matrix_build <- eventReactive(input$submit | input$submit1 | input$submit2, {
 observeEvent({input$clear
   input$clear1
   input$clear2},  {
-  comp_list$dList <- NULL
-  contrast$matrix <- NULL
-})
+    comp_list$dList <- NULL
+    contrast$matrix <- NULL
+  })
 
 # compare data
 
 data_comparison <- eventReactive(input$calculate, {
-  groupComparison(contrast.matrix = matrix_build(), data = preprocess_data())
+  if(input$DDA_DIA=="TMT"){
+    groupComparisonTMT(contrast.matrix = matrix_build(), data = preprocess_data())
+  }
+  else{
+    groupComparison(contrast.matrix = matrix_build(), data = preprocess_data())
+  }
+  
 })
 
 round_df <- function(df) {
@@ -142,10 +157,19 @@ round_df <- function(df) {
   (df)
 }
 
-SignificantProteins <- reactive({with(data_comparison(),
-                                      round_df(ComparisonResult[ComparisonResult$adj.pvalue < input$signif, ]))
+SignificantProteins <- reactive({
+  if(input$DDA_DIA=="TMT"){
+    data_comp <- data_comparison()
+    with(data_comp,round_df(data_comp[data_comp$adj.pvalue < input$signif, ]))
+    
+  } else {
+    with(data_comparison(),round_df(ComparisonResult[ComparisonResult$adj.pvalue < input$signif, ]))
+  }
   
 })
+  
+
+
 
 # comparison plots
 
@@ -179,29 +203,41 @@ group_comparison <- function(saveFile1, pdf) {
     }
     return(path1_id)
   }
-  plot1 <- groupComparisonPlots2(data=data_comparison()$ComparisonResult,
-                                type=input$typeplot,
-                                sig=input$sig,
-                                FCcutoff=input$FC,
-                                logBase.pvalue=input$logp,
-                                #                     ylimUp=input_ylup,
-                                #                     ylimDown=input_yldown,
-                                #                     xlimUp=input_xlimUp,
-                                #                     x.axis.size=input_xax,
-                                #                     y.axis.size=input_yax,
-                                #                     dot.size=input_dot,
-                                #                     text.size=input_text,
-                                #                     legend.size=input_legend,
-                                ProteinName=input$pname,
-                                numProtein=input$nump, 
-                                clustering=input$cluster, 
-                                #                     height=input_h, 
-                                #                     width=input_w, 
-                                which.Comparison=input$whichComp,
-                                which.Protein = input$whichProt,
-                                address=path1(),
-                                savePDF=pdf
-  )
+  
+  if(input$DDA_DIA=="TMT"){
+    
+    plot1 <- groupComparisonPlots2(data=data_comparison(),
+                                   type=input$typeplot,
+                                   sig=input$sig,
+                                   FCcutoff=input$FC,
+                                   logBase.pvalue=input$logp,
+                                   ProteinName=input$pname,
+                                   numProtein=input$nump, 
+                                   clustering=input$cluster, 
+                                   which.Comparison=input$whichComp,
+                                   which.Protein = input$whichProt,
+                                   address=path1(),
+                                   savePDF=pdf
+    )
+    
+  } else{
+    
+    plot1 <- groupComparisonPlots2(data=data_comparison()$ComparisonResult,
+                                   type=input$typeplot,
+                                   sig=input$sig,
+                                   FCcutoff=input$FC,
+                                   logBase.pvalue=input$logp,
+                                   ProteinName=input$pname,
+                                   numProtein=input$nump, 
+                                   clustering=input$cluster, 
+                                   which.Comparison=input$whichComp,
+                                   which.Protein = input$whichProt,
+                                   address=path1(),
+                                   savePDF=pdf
+    )
+    
+  }
+  
   if(saveFile1) {
     return(id_address1)
   }
@@ -240,7 +276,7 @@ assumptions1 <- function(saveFile3, protein) {
     return(NULL)
   }
 }
-  
+
 
 
 ########## output ##########
@@ -277,10 +313,10 @@ output$matrix <- renderUI({
   tagList(
     h5("Comparison matrix"),
     if (is.null(contrast$matrix)) {
-    ""
-      } else {
-    tableOutput("table") 
-  }
+      ""
+    } else {
+      tableOutput("table") 
+    }
   )
 })
 
@@ -328,8 +364,8 @@ observeEvent(input$viewresults, {
       conditionalPanel(condition = "input.typeplot == 'VolcanoPlot'",
                        h5("Click on plot for details"),
                        verbatimTextOutput("info2")),
-       conditionalPanel(condition = "input.typeplot == 'Heatmap'",
-                         sliderInput("height", "Plot height", value = 500, min = 200, max = 1300, post = "px"))
+      conditionalPanel(condition = "input.typeplot == 'Heatmap'",
+                       sliderInput("height", "Plot height", value = 500, min = 200, max = 1300, post = "px"))
     )
   )
 }
@@ -339,21 +375,33 @@ observeEvent(input$viewresults, {
 
 observe ({output$comp_plots <- renderPlot({
   group_comparison(FALSE, FALSE)}, height = input$height
-  )
+)
 })
 
 plotset <- reactive({
-  v1 <- data_comparison()$ComparisonResult[,1]
-  v2 <- round(data_comparison()$ComparisonResult[,3], 10)
-  v3 <- round(data_comparison()$ComparisonResult[,8], 10)
-  v4 <- data_comparison()$ComparisonResult[,2]
+  
+  if(input$DDA_DIA=="TMT"){
+    data_comp <- data_comparison()
+    v1 <- data_comp[,1]
+    v2 <- round(data_comp[,3], 10)
+    v3 <- round(data_comp[,8], 10)
+    v4 <- data_comp[,2]
+    
+  } else{
+    v1 <- data_comparison()$ComparisonResult[,1]
+    v2 <- round(data_comparison()$ComparisonResult[,3], 10)
+    v3 <- round(data_comparison()$ComparisonResult[,8], 10)
+    v4 <- data_comparison()$ComparisonResult[,2]
+    
+  }
+  
   if (input$logp == "2") {
     v3 <- -log2(v3)
   }
   else if (input$logp == "10") {
     v3 <- - log10(v3)
   }
-
+  
   df <- data.frame(v1,v2,v3,v4)
   df <- df[df$v4 == input$whichComp,]
   colnames(df) <- c("Protein", "logFC", "logadj.pvalue", "comparison")
@@ -362,8 +410,8 @@ plotset <- reactive({
 
 output$info2 <- renderPrint({
   print(nearPoints(plotset(), input$click1, xvar = "logFC", yvar = "logadj.pvalue"))
-  })
-  
+})
+
 # Assumption plots in browser
 
 output$verify <- renderUI ({
@@ -413,7 +461,12 @@ output$download_compar <- downloadHandler(
     paste("data-", Sys.Date(), ".csv", sep="")
   },
   content = function(file) {
-    write.csv(data_comparison()$ComparisonResult, file)
+    if(input$DDA_DIA=="TMT") {
+      write.csv(data_comparison(), file)
+    } else {
+      write.csv(data_comparison()$ComparisonResult, file)
+    }
+    
   }
 )
 
@@ -445,7 +498,6 @@ observeEvent(input$plotresults, {
     )
   )
 })
-
 
 
 

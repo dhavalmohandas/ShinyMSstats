@@ -16,7 +16,7 @@ statmodel = fluidPage(
 # statistical model
     
     sidebarPanel(
-                        h3("STEP (i) - Define comparisons", tipify(icon("question-circle"), title="Choose pairwise comparisons to find significantly expressed proteins")),
+                        h4("STEP (i) - Define comparisons", tipify(icon("question-circle"), title="Choose pairwise comparisons to find significantly expressed proteins")),
                         fluidRow(
                                  radioButtons("def_comp", "Define contrast matrix", c("All possible pairwise comparisons" = "all_pair", "Compare all against one" = "all_one", "Create custom comparisons" = "custom"), selected = character(0)),
                                  conditionalPanel(condition = "input.def_comp == 'custom'",
@@ -43,7 +43,7 @@ statmodel = fluidPage(
 # table of significant proteins 
                fluidRow(
                  column(12,
-                        h3("STEP (ii) - Group Comparison"),
+                        h4("STEP (ii) - Group Comparison"),
                         actionButton("calculate", "Start")
                  )
                ),
@@ -51,7 +51,7 @@ statmodel = fluidPage(
 
                fluidRow(
                  column(12,
-                        h3("STEP (iii) - Visualization"),
+                        h4("STEP (iii) - Visualization"),
                                          fluidRow(
     
                                                   selectInput("typeplot", 
