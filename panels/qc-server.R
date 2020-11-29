@@ -108,7 +108,6 @@ preprocess_data = eventReactive(input$run, {
                                          method = input$summarization,
                                          reference_norm = input$reference_norm,
                                          remove_norm_channel = input$remove_norm_channel,
-                                         remove_empty_channel = input$remove_empty_channel,
                                          MBimpute = TRUE,
                                          maxQuantileforCensored = NULL
                                          )

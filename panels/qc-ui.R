@@ -5,7 +5,9 @@ sbp_params = sidebarPanel(
   # transformation
   
   conditionalPanel(condition = "input.DDA_DIA == 'TMT'",
-                   h4("1. Peptide level normalization"),
+                   h4("1. Peptide level normalization", 
+                      tipify(icon("question-circle"), 
+                      title = "Global median normalization on peptide level data, which equalizes the medians across all the channels and MS runs")),
                    checkboxInput("global_norm_parameter", "Yes")),
   
   conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
@@ -20,14 +22,16 @@ sbp_params = sidebarPanel(
   
   conditionalPanel(condition = "input.DDA_DIA == 'TMT'",
                    selectInput("summarization", 
-                               label = h4("2. Summarization method: method parameter ", 
+                               label = h4("2. Summarization method", 
                                           tipify(icon("question-circle"), 
                                                  title = "Choose a normalisation method.  For more information visit the Help tab")), 
                                c("MSstats" = "msstats", "Tukey’s median polish" = "MedianPolish", "Log(Sum)" = "LogSum","Median" = "Median"), 
                                selected = "log")),
   
   conditionalPanel(condition = "input.DDA_DIA == 'TMT' && input.summarization == 'msstats'",
-                                checkboxInput("null", "Do not apply cutoff"),
+                                checkboxInput("null", label = p("Do not apply cutoff", 
+                                                                 tipify(icon("question-circle"), 
+                                                                        title = "We assume missing values are censored. The parameter is the maximum quantile for deciding censored missing value"))),
                                 numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001)),
   
   #normalisation
@@ -43,12 +47,13 @@ sbp_params = sidebarPanel(
   
   conditionalPanel(
     condition = "input.DDA_DIA === 'TMT'",
-    h4("3. Local protein normalization"),
-    checkboxInput("reference_norm", "Reference norm parameter", value = T),
+    h4("3. Local protein normalization",
+       tipify(icon("question-circle"), 
+              title = "For each protein, perform reference channel-based normalization between MS runs on protein level data. It needs at least one reference channel in each MS run, annotated by ‘Norm’ in Condition column of annotation file")),
+    checkboxInput("reference_norm", "Yes", value = T),
     tags$hr(),
     h4("4. Filtering"),
-    checkboxInput("remove_norm_channel", "Remove normalization channel", value = T),
-    checkboxInput("remove_empty_channel", "Remove empty channel",value = T),
+    checkboxInput("remove_norm_channel", "Remove normalization channel", value = T)
     
   ),
  
@@ -78,7 +83,7 @@ sbp_params = sidebarPanel(
     
     # max quantile for censored
     h5("Max quantile for censored", tipify(icon("question-circle"), title = "Max quantile for censored")),
-    checkboxInput("null", "Do not apply cutoff"),
+    checkboxInput("null", label = "Do not apply cutoff to censor missing values"),
     numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001),
     
     
