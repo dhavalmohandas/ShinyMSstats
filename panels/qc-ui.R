@@ -8,7 +8,7 @@ sbp_params = sidebarPanel(
                    h4("1. Peptide level normalization", 
                       tipify(icon("question-circle"), 
                       title = "Global median normalization on peptide level data, which equalizes the medians across all the channels and MS runs")),
-                   checkboxInput("global_norm_parameter", "Yes")),
+                   checkboxInput("global_norm", "Yes", value = T)),
   
   conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
                    radioButtons("log", 
@@ -24,7 +24,7 @@ sbp_params = sidebarPanel(
                    selectInput("summarization", 
                                label = h4("2. Summarization method", 
                                           tipify(icon("question-circle"), 
-                                                 title = "Choose a normalisation method.  For more information visit the Help tab")), 
+                                                 title = "1. MSstats: Perform missing value imputation and Tukey’s median polish summarization for each MS run separately   2. Tukey’s median polish: Perform Tukey’s median polish summarization for each MS run separately. 3. Median: Perform median summarization for each MS run separately. 4. Log(Sum): Sum the raw intensities of peptides ions matched with each protein and log-transform the sum.")), 
                                c("MSstats" = "msstats", "Tukey’s median polish" = "MedianPolish", "Log(Sum)" = "LogSum","Median" = "Median"), 
                                selected = "log")),
   
@@ -136,10 +136,14 @@ main = mainPanel(
     tabPanel("Plot", 
              wellPanel(
                p("Please preprocess data to view quality control plots"),
-               selectInput("type",
-                           label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot","Show Condition plot"="ConditionPlot")),
-               conditionalPanel(condition = "input.type == 'ProfilePlot'",
-                                checkboxInput("summ", "Show plot with summary"),
+               conditionalPanel(condition = "input.DDA_DIA==='TMT'",
+                                selectInput("type",
+                                            label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot"))),
+               conditionalPanel(condition = "input.DDA_DIA!=='TMT'",
+                                selectInput("type",
+                                            label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot","Show Condition plot"="ConditionPlot"))),
+               checkboxInput("summ", "Show plot with summary"),
+               conditionalPanel(condition = "input.type == 'ProfilePlot' && input.DDA_DIA!=='TMT'",
                                 selectInput("fname",  
                                             label = h5("Feature legend", tipify(icon("question-circle"), title = "Print feature level at transition level, peptide level or choose no feature legend")), c("Transition level"="Transition", "Peptide level"="Peptide", "No feature legend"="NA"))
                ),

@@ -387,7 +387,7 @@ output$summary1 <-  renderTable(
     t_df$value <- sub("\\.\\d+$", "", t_df$value)
     colnames(t_df) <- c("", "")
     t_df
-  }, bordered = T
+  }, colnames = FALSE, bordered = T
 )
 
 output$summary2 <-  renderTable(
@@ -438,7 +438,7 @@ output$summary2 <-  renderTable(
     #t_df <- get_summary2()
     t_df
     
-  }, bordered = T, align='lr'
+  }, colnames = FALSE, bordered = T, align='lr'
 )
 
 shinyjs::enable("proceed1")

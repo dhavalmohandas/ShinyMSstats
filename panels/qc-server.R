@@ -106,6 +106,7 @@ preprocess_data = eventReactive(input$run, {
     
     preprocessed <- proteinSummarization(data = get_data(), 
                                          method = input$summarization,
+                                         global_norm = input$global_norm,
                                          reference_norm = input$reference_norm,
                                          remove_norm_channel = input$remove_norm_channel,
                                          MBimpute = TRUE,
@@ -172,7 +173,7 @@ plotresult <- function(saveFile, protein, summary, original) {
                           # height = 10,
                           which.Protein = protein,
                           originalPlot = TRUE,
-                          summaryPlot = TRUE,
+                          summaryPlot = input$summ,
                           address = path()
       )
       
