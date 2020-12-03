@@ -5,7 +5,7 @@ output: pdf_document
 
 # Introduction
 
-This is the report of the analysis performed with the R package MSstats on the web application MSstats-Shiny (https://cristinapasi.shinyapps.io/Shiny-MSstats/).
+This is the report of the analysis performed with the R package MSstats on the web application MSstats-Shiny.
 The analysis was performed with the following packages:
 
 ```{r}
@@ -16,11 +16,19 @@ The original data was collected using a `r params$p1` acquisition.
 The summary of the analysed data is:
 
 ```{r echo=F}
-if(is.null(get_data())){
+tryCatch({
+  print(str(get_data()))
+  print(summary(get_data()))
+},error =  function(e){
   knit_exit()
-}
-print(str(get_data()))
-print(summary(get_data()))
+})
+
+tryCatch({
+  preprocess_data()
+},error =  function(e){
+  knit_exit()
+})
+
 ```
 
 # Quality control
@@ -42,10 +50,13 @@ The data was preprocessed with the following parameters:
 The summary of the preprocessed data is:
 
 ```{r echo=F}
-if(is.null(preprocess_data())){
+tryCatch({
+  str(preprocess_data())
+}, error = function(e){
   knit_exit()
-}
-str(preprocess_data())
+})
+
+
 ```
 
 Preprocessed data and summarised data can be downloaded from the Quality Control window (preprocessing tab).
@@ -57,28 +68,38 @@ Plots of preprocessed data can be downloaded in the Quality Control window (plot
 The comparisons have been defined as follows:
 
 ```{r}
-comp_list$dList
-
-if(is.null(matrix_build())){
+tryCatch({
+  comp_list$dList
+}, error = function(e){
   knit_exit()
-}
+})
 
 ```
 
 Which result in the comparison matrix:
 
 ```{r}
-matrix_build()
-if(is.null(SignificantProteins())){
+tryCatch({
+  matrix_build()
+}, error = function(e){
   knit_exit()
-}
+})
+
 ```
 
 The total number of proteins that are differentially expressed in the comparisons at `r input$signif` significance is: `r nrow(SignificantProteins())`.
 
 ```{r}
-req(SignificantProteins())
-head(SignificantProteins(),20)
+tryCatch({
+  
+  req(SignificantProteins())
+  head(SignificantProteins(),20)
+  
+}, error = function(e){
+  knit_exit()
+}
+)
+
 ```
 
 Plots of results can be downloaded from the Statistical Model window, Data Comparison tab.

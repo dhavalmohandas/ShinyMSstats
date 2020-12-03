@@ -40,4 +40,5 @@ output$pdf <- downloadHandler(
     rmarkdown::render(tempReport, output_file = file,
                       params = params
     )
+    
   })  
