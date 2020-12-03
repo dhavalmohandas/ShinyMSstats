@@ -8,6 +8,7 @@ library(ggplot2)
 library(tidyverse)
 library(data.table)
 library(MSstatsTMT)
+library(knitr)
 
 if (FALSE) require("V8")
 library(MSnbase)

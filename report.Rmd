@@ -16,6 +16,9 @@ The original data was collected using a `r params$p1` acquisition.
 The summary of the analysed data is:
 
 ```{r echo=F}
+if(is.null(get_data())){
+  knit_exit()
+}
 print(str(get_data()))
 print(summary(get_data()))
 ```
@@ -39,6 +42,9 @@ The data was preprocessed with the following parameters:
 The summary of the preprocessed data is:
 
 ```{r echo=F}
+if(is.null(preprocess_data())){
+  knit_exit()
+}
 str(preprocess_data())
 ```
 
@@ -53,17 +59,25 @@ The comparisons have been defined as follows:
 ```{r}
 comp_list$dList
 
+if(is.null(matrix_build())){
+  knit_exit()
+}
+
 ```
 
 Which result in the comparison matrix:
 
 ```{r}
 matrix_build()
+if(is.null(SignificantProteins())){
+  knit_exit()
+}
 ```
 
 The total number of proteins that are differentially expressed in the comparisons at `r input$signif` significance is: `r nrow(SignificantProteins())`.
 
 ```{r}
+req(SignificantProteins())
 head(SignificantProteins(),20)
 ```
 
