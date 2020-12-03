@@ -38,7 +38,7 @@ Rownames <- reactive({
 
 output$WhichComp <- renderUI ({
   selectInput("whichComp", 
-              label = h4("which comparison to plot"), c("all", Rownames()), selected = "all")
+              label = h5("Select comparison to plot"), c("all", Rownames()), selected = "all")
 })
 
 output$WhichProt <- renderUI ({
@@ -315,23 +315,23 @@ output$matrix <- renderUI({
     if (is.null(contrast$matrix)) {
       ""
     } else {
-      tableOutput("table") 
+      dataTableOutput("table") 
     }
   )
 })
 
-output$table <-  renderTable({
+output$table <-  renderDataTable({
   matrix_build()
-}, rownames = T, bordered = T)
+}, rownames = T)
 
 # table of significant proteins
 
 output$table_results <- renderUI({
   req(data_comparison())
   tagList(
-    h4("Results"),
     tags$br(),
-    h4("There are ",textOutput("number", inline = TRUE),"significant proteins"),
+    h5("Results"),
+    h5("There are ",textOutput("number", inline = TRUE),"significant proteins"),
     dataTableOutput("significant", width = "100%"),
     tags$br(),
     downloadButton("download_compar", "Download full table of comparison"),
@@ -341,7 +341,7 @@ output$table_results <- renderUI({
 
 output$significant <- renderDataTable({
   SignificantProteins()
-}
+}, rownames = F
 )
 
 # number of significant proteins
