@@ -137,17 +137,19 @@ main = mainPanel(
              wellPanel(
                p("Please preprocess data to view quality control plots"),
                conditionalPanel(condition = "input.DDA_DIA==='TMT'",
-                                selectInput("type",
+                                selectInput("type1",
                                             label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot"))),
                conditionalPanel(condition = "input.DDA_DIA!=='TMT'",
-                                selectInput("type",
+                                selectInput("type2",
                                             label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot","Show Condition plot"="ConditionPlot"))),
-               checkboxInput("summ", "Show plot with summary"),
-               conditionalPanel(condition = "input.type == 'ProfilePlot' && input.DDA_DIA!=='TMT'",
+               conditionalPanel(condition = "input.type1==='ProfilePlot' || input.type2==='ProfilePlot'",
+                                checkboxInput("summ", "Show plot with summary")
+                                ),
+               conditionalPanel(condition = "input.type2 === 'ProfilePlot' && input.DDA_DIA!='TMT' && !input.summ",
                                 selectInput("fname",  
                                             label = h5("Feature legend", tipify(icon("question-circle"), title = "Print feature level at transition level, peptide level or choose no feature legend")), c("Transition level"="Transition", "Peptide level"="Peptide", "No feature legend"="NA"))
                ),
-               conditionalPanel(condition = "input.type == 'ConditionPlot'",
+               conditionalPanel(condition = "input.type2 == 'ConditionPlot'",
                                 checkboxInput("cond_scale", "Scale conditional level at x-axis (unequal space at x-axis)", value = FALSE),
                                 radioButtons("interval", "width of error bar", c("use Confidence Interval"="CI", "use Standard Deviation"="SD"))
                ),

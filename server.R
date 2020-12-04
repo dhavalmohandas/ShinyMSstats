@@ -75,7 +75,19 @@ shinyServer(function(input, output, session) {
   observe({
     currentTab <<- input$tablist
     updateTabsetPanel(session = session, inputId = "tablist", selected = currentTab)
+    
+    if(input$DDA_DIA=="TMT"){
+      hideTab(inputId = "tablist", target = "PQ")
+      hideTab(inputId = "tablist", target = "Future")
+    }
+    
+    if(input$DDA_DIA!="TMT"){
+      showTab(inputId = "tablist", target = "PQ")
+      showTab(inputId = "tablist", target = "Future")
+    }
+    
   })
+  
 
 }
 )

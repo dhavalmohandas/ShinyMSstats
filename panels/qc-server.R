@@ -87,7 +87,7 @@ features <- function() {
 # which protein to plot (will add "all" for QCPlot)
 
 output$Which <- renderUI({
-  if (input$type == "QCPlot") {
+  if (input$type2 == "QCPlot" || input$type1 == "QCPlot") {
     selectizeInput("which", "Show plot for", choices = c("", "ALL PROTEINS" = "allonly", unique(get_data()[1])))
   }
   else {
@@ -159,7 +159,7 @@ plotresult <- function(saveFile, protein, summary, original) {
       
       dataProcessPlotsTMT(get_data(),
                           preprocess_data(),
-                          type=input$type,
+                          type=input$type1,
                           ylimUp = FALSE,
                           ylimDown = FALSE,
                           # x.axis.size = 10,
@@ -182,7 +182,7 @@ plotresult <- function(saveFile, protein, summary, original) {
     else{
       
       plot <- dataProcessPlots(data = preprocess_data(),
-                               type=input$type,
+                               type=input$type2,
                                featureName = input$fname,
                                ylimUp = F,
                                ylimDown = F,
@@ -199,7 +199,7 @@ plotresult <- function(saveFile, protein, summary, original) {
                                #              height = input_height,
                                which.Protein = protein,
                                originalPlot = original,
-                               summaryPlot = summary,
+                               summaryPlot = input$summ,
                                save_condition_plot_result = FALSE,
                                address = path()
       )
@@ -294,15 +294,15 @@ output$summ_csv <- downloadHandler(
 
  observeEvent(input$saveone, {
    path <- plotresult(TRUE, input$which, FALSE, TRUE)
-   if (input$type == "ProfilePlot") {
+   if (input$type1 == "ProfilePlot" || input$type2 == "ProfilePlot") {
      js <- paste("window.open('", path, "ProfilePlot.pdf')", sep="")
      shinyjs::runjs(js);
    }
-   else if (input$type == "ConditionPlot") {
+   else if (input$type2 == "ConditionPlot") {
      js <- paste("window.open('", path, "ConditionPlot.pdf')", sep="")
      shinyjs::runjs(js);
    }
-   else if (input$type == "QCPlot") {
+   else if (input$type1 == "QCPlot" || input$type2 == "QCPlot") {
      js <- paste("window.open('", path, "QCPlot.pdf')", sep="")
      shinyjs::runjs(js);
    }
@@ -310,15 +310,15 @@ output$summ_csv <- downloadHandler(
    
  observeEvent(input$saveall, {
    path <- plotresult(TRUE, "all", FALSE, TRUE)
-   if (input$type == "ProfilePlot") {
+   if (input$type1 == "ProfilePlot" || input$type2 == "ProfilePlot") {
      js <- paste("window.open('", path, "ProfilePlot.pdf')", sep="")
      shinyjs::runjs(js);
    }
-   else if (input$type == "ConditionPlot") {
+   else if (input$type2 == "ConditionPlot") {
      js <- paste("window.open('", path, "ConditionPlot.pdf')", sep="")
      shinyjs::runjs(js);
    }
-   else if (input$type == "QCPlot") {
+   else if (input$type1 == "QCPlot" || input$type2 == "QCPlot") {
      js <- paste("window.open('", path, "QCPlot.pdf')", sep="")
      shinyjs::runjs(js);
    }
