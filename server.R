@@ -11,9 +11,9 @@ library(plotly)
 library(ggrepel)
 library(marray)
 library(gplots)
-library(STRINGdb)
+#library(STRINGdb)
 if (FALSE) require("V8")
-library(MSnbase)
+#library(MSnbase)
 library(MSstatsBioData)
 
 ###### global functions ###########

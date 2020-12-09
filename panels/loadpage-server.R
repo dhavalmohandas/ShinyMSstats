@@ -171,7 +171,13 @@ get_data = reactive({
     
     }
   else {
-    infile <- input$data
+    if(input$filetype=='spec' || input$filetype=='spmin'){
+      infile <- input$data1
+    }
+    else{
+      infile <- input$data
+    }
+    
     
     if(input$filetype=='maxq'){
       if(is.null(ev_maxq) || is.null(pg_maxq) || is.null(an_maxq) ) {
@@ -263,7 +269,7 @@ get_data = reactive({
       
     }
     else if(input$filetype == 'spec') {
-      data <- read.csv(infile$datapath, header = T, sep = input$sep)
+      data <- read_xls(infile$datapath, header = T)
       mydata <- SpectronauttoMSstatsFormat(data,
                                            annotation = get_annot(),
                                            filter_with_Qvalue = TRUE, ## same as default
@@ -308,7 +314,7 @@ get_data = reactive({
                                                  removeProtein_with1Feature = TRUE)
     }
     else if(input$filetype == 'spmin') {
-      data <- read.csv(infile$datapath, header = T, sep="\t")
+      data <- read.csv(infile$datapath, sep="\t")
       mydata <- SpectroMinetoMSstatsTMTFormat(data, get_annot())
     }
     }

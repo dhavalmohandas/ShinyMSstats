@@ -162,7 +162,7 @@ main = mainPanel(
                               tags$h4("Calculation in progress...")),
              uiOutput("showplot")
              )
-  )
+    )
 )
   
   
@@ -171,6 +171,7 @@ main = mainPanel(
 ########################################################################################
 
 qc = fluidPage(
+  tags$style(HTML('#proceed6{background-color:orange}')),
   headerPanel("Data Processing"),
   p("Preprocessing of the data is performed through: (i) Log transformation, (ii) Normalisation, (iii) Feature selection, (iv) Imputation for censored missing values, (v) Run-level summarisation.  Please choose preprocessing parameters and hit Run.  More information on the preprocessing step can be found ", 
     a("here", href="https://rdrr.io/bioc/MSstats/man/dataProcess.html", target="_blank")),
@@ -181,5 +182,6 @@ qc = fluidPage(
   sbp_params,
   column(width = 8,
   main
- )
+ ),
+ actionButton(inputId = "proceed6", label = "Next Step")
 )

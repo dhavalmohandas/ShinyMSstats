@@ -1,17 +1,19 @@
 rm(list=setdiff(ls(), 'currentTab'))
 #options(shiny.autoreload = TRUE)
+#options(shiny.maxRequestSize=2000*1024^2)
 library(shiny)
 library(shinyBS)
 library(shinyjs)
-library(STRINGdb)
+#library(STRINGdb)
 library(ggplot2)
 library(tidyverse)
 library(data.table)
 library(MSstatsTMT)
 library(knitr)
+library(readxl)
 
 if (FALSE) require("V8")
-library(MSnbase)
+#library(MSnbase)
 
 #####################################
 

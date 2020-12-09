@@ -5,7 +5,13 @@
 
 output$Names <- renderUI({
   if (input$standards == "Proteins") {
-    selectizeInput("names", "choose standard", unique(get_data()[1]), multiple = T)
+    if((input$DDA_DIA=="SRM_PRM" && input$filetype=="sky")||(input$DDA_DIA=="DIA" && input$filetype=="ump")){
+      selectizeInput("names", "choose standard", unique(get_data()[2]), multiple = T)
+    }
+    else{
+      selectizeInput("names", "choose standard", unique(get_data()[1]), multiple = T)
+    }
+    
   }
   else if (input$standards == "Peptides") {
     selectizeInput("names", "choose standard", unique(get_data()[2]), multiple = T)
@@ -88,7 +94,13 @@ features <- function() {
 
 output$Which <- renderUI({
   if (input$type2 == "QCPlot" || input$type1 == "QCPlot") {
-    selectizeInput("which", "Show plot for", choices = c("", "ALL PROTEINS" = "allonly", unique(get_data()[1])))
+    if((input$DDA_DIA=="SRM_PRM" && input$filetype=="sky")||(input$DDA_DIA=="DIA" && input$filetype=="ump")){
+      selectizeInput("which", "Show plot for", choices = c("", "ALL PROTEINS" = "allonly", unique(get_data()[2])))
+    }
+    else{
+      selectizeInput("which", "Show plot for", choices = c("", "ALL PROTEINS" = "allonly", unique(get_data()[1])))
+    }
+    
   }
   else {
     selectizeInput("which", "Show plot for", choices = c("", unique(get_data()[1])))
@@ -332,9 +344,9 @@ output$showplot <- renderUI({
     tags$br(),
     conditionalPanel(condition = "input.which != ''",
                      actionButton("saveone", "Save this plot"),
-                     bsTooltip(id = "saveone", title = "Open plot as pdf.  Popups must be enabled", placement = "bottom", trigger = "hover"),
-                     actionButton("saveall", "Save all plots"),
-                     bsTooltip(id = "saveall", title = "Open pdf of all plots.  Popups must be enabled", placement = "bottom", trigger = "hover")
+                     bsTooltip(id = "saveone", title = "Open plot as pdf.  Popups must be enabled", placement = "bottom", trigger = "hover")#,
+                     #actionButton("saveall", "Save all plots"),
+                     #bsTooltip(id = "saveall", title = "Open pdf of all plots.  Popups must be enabled", placement = "bottom", trigger = "hover")
                      )
     )
 })
@@ -352,3 +364,9 @@ theplot <- reactive({
 output$theplot <- renderPlot(theplot())
 
 output$stats <- renderTable(statistics())
+
+onclick("proceed6", {
+  updateTabsetPanel(session = session, inputId = "tablist", selected = "DataProcessing")
+})
+
+
