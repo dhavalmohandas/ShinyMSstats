@@ -361,7 +361,7 @@ observeEvent(input$viewresults, {
     selector = "#comparison_plots",
     ui=tags$div(
       plotOutput("comp_plots", height = "100%", click = "click1"),
-      conditionalPanel(condition = "input.typeplot == 'VolcanoPlot'",
+      conditionalPanel(condition = "input.typeplot == 'VolcanoPlot' && input.DDA_DIA!='TMT'",
                        h5("Click on plot for details"),
                        verbatimTextOutput("info2")),
       conditionalPanel(condition = "input.typeplot == 'Heatmap'",

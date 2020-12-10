@@ -132,7 +132,13 @@ main = mainPanel(
                               tags$br(),
                               tags$br(),
                               tags$h4("Calculation in progress...")),
-             tags$div(id='download_buttons')),
+             #tags$div(id='download_buttons')
+             tags$br(),
+             disabled(downloadButton("prepr_csv","Download .csv of preprocessed data")),
+             conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
+                              disabled(downloadButton("summ_csv","Download .csv of summarised data"))
+             )
+             ),
     tabPanel("Plot", 
              wellPanel(
                p("Please preprocess data to view quality control plots"),
@@ -181,7 +187,8 @@ qc = fluidPage(
   tags$br(),
   sbp_params,
   column(width = 8,
-  main
+  main,
+  actionButton(inputId = "proceed6", label = "Next Step")
  ),
- actionButton(inputId = "proceed6", label = "Next Step")
+ 
 )

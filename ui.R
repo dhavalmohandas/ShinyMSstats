@@ -1,4 +1,4 @@
-rm(list=setdiff(ls(), 'currentTab'))
+rm()
 #options(shiny.autoreload = TRUE)
 #options(shiny.maxRequestSize=2000*1024^2)
 library(shiny)

@@ -254,24 +254,32 @@ statistics <- reactive({
 
 ######## output #######
 
-
+observeEvent(input$run,{
+  if(input$DDA_DIA=="TMT"){
+    shinyjs::enable("prepr_csv")
+  } else {
+    shinyjs::enable("prepr_csv")
+    shinyjs::enable("summ_csv")
+  }
+  
+})
 # output preprocessed data
 
-observeEvent(input$run, {
-  output$effect <- renderPrint(
-    str(preprocess_data())
-  )
-  insertUI(selector = "#download_buttons",
-           where = "afterEnd",
-           ui= tags$div(tags$br(),
-                        downloadButton("prepr_csv","Download .csv of preprocessed data"),
-                        conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
-                                         downloadButton("summ_csv","Download .csv of summarised data")
-                                         )
-
-           )
-  )
-})
+# observeEvent(input$run, {
+#   output$effect <- renderPrint(
+#     str(preprocess_data())
+#   )
+#   insertUI(selector = "#download_buttons",
+#            where = "afterEnd",
+#            ui= tags$div(tags$br(),
+#                         downloadButton("prepr_csv","Download .csv of preprocessed data"),
+#                         conditionalPanel(condition = "input.DDA_DIA !== 'TMT'",
+#                                          downloadButton("summ_csv","Download .csv of summarised data")
+#                                          )
+# 
+#            )
+#   )
+# })
 
 # download preprocessed data
 
@@ -366,7 +374,13 @@ output$theplot <- renderPlot(theplot())
 output$stats <- renderTable(statistics())
 
 onclick("proceed6", {
-  updateTabsetPanel(session = session, inputId = "tablist", selected = "DataProcessing")
+  if(input$DDA_DIA=="TMT"){
+    updateTabsetPanel(session = session, inputId = "tablist", selected = "StatsModel")
+  }
+  else{
+    updateTabsetPanel(session = session, inputId = "tablist", selected = "PQ")
+  }
+  
 })
 
 

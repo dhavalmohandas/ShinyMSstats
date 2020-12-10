@@ -86,7 +86,7 @@ sbp_load = sidebarPanel(
                                                      numericInput("m_cutoff", "M-score cutoff", 0.01, 0, 1, 0.01)))
   ),
   disabled(actionButton(inputId = "proceed1", label = "Next")),
-  disabled(actionButton(inputId = "reset1", label = "Reset"))
+  disabled(actionButton(inputId = "reset1", label = "Restart"))
 )
 
 ##########################################

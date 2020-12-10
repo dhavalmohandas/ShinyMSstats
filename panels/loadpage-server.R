@@ -413,9 +413,9 @@ output$summary2 <-  renderTable(
     df1 <- df %>% summarise("Number of Protiens" = n_distinct(ProteinName), 
                             "Number of Peptides" = n_distinct(PeptideSequence),
                             "Number of Features" = n_distinct(FEATURES),
-                            "Min_Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,min(Intensity, na.rm=T)),
+                            "Min_Intensity" = ifelse(!is.finite(min(Intensity, na.rm=T)),0,round(min(Intensity, na.rm=T),0)),
                             "Max_Intensity" = ifelse(!is.finite(max(Intensity, na.rm=T)),0,
-                                                     max(Intensity, na.rm=T))) %>%
+                                                     round(max(Intensity, na.rm=T),0))) %>%
       unite("Intensity", Min_Intensity:Max_Intensity, sep = " - ")
     
     Peptides_Proteins <- df %>% group_by(ProteinName)  %>%
@@ -461,10 +461,6 @@ onclick("proceed2", {
   updateTabsetPanel(session = session, inputId = "tablist", selected = "DataProcessing")
 })
 
-onclick("reset1", {
-  shinyjs::runjs("location.reload()")
-  updateTabsetPanel(session = session, inputId = "tablist", selected = "Uploaddata")
-})
 
 output$summary_tables <- renderUI({
   

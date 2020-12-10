@@ -73,8 +73,8 @@ shinyServer(function(input, output, session) {
   # output$statmodel <- renderUI(statmodel())
  
   observe({
-    currentTab <<- input$tablist
-    updateTabsetPanel(session = session, inputId = "tablist", selected = currentTab)
+    #currentTab <<- input$tablist
+    #updateTabsetPanel(session = session, inputId = "tablist", selected = currentTab)
     
     if(input$DDA_DIA=="TMT"){
       hideTab(inputId = "tablist", target = "PQ")
@@ -86,6 +86,11 @@ shinyServer(function(input, output, session) {
       showTab(inputId = "tablist", target = "Future")
     }
     
+  })
+  
+  onclick("reset1", {
+    shinyjs::runjs("location.reload()")
+    updateTabsetPanel(session = session, inputId = "tablist", selected = "Uploaddata")
   })
   
 

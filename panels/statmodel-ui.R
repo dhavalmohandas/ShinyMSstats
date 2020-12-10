@@ -58,7 +58,7 @@ statmodel = fluidPage(
                                                label = h4("3. Visualization - Select plot type"), c("Volcano Plot" = "VolcanoPlot", "Heatmap"="Heatmap", "Comparison Plot"="ComparisonPlot")),
                                    conditionalPanel(condition = "input.typeplot == 'VolcanoPlot'",
                                                     uiOutput("WhichComp")),
-                                   conditionalPanel(condition = "input.typeplot == 'VolcanoPlot'",
+                                   conditionalPanel(condition = "input.typeplot == 'VolcanoPlot' && input.DDA_DIA!=='TMT'",
                                                     checkboxInput("pname", 
                                                                   label = p("display protein name"))),
                                    conditionalPanel(condition = "input.typeplot == 'VolcanoPlot' || input.typeplot == 'Heatmap'",
