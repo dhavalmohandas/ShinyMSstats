@@ -87,7 +87,12 @@ matrix_build <- eventReactive(input$submit | input$submit1 | input$submit2, {
     for (index in 1:length(choices())) {
       index3 <- reactive({which(choices() == input$group3)})
       if(index == index3()) next
-      comp_list$dList <- c(isolate(comp_list$dList), paste(index, "vs", input$group3, sep = " "))
+      if(input$DDA_DIA=="TMT"){
+        comp_list$dList <- c(isolate(comp_list$dList), paste(choices()[index], " vs ", input$group3, sep = ""))
+      } else{
+        comp_list$dList <- c(isolate(comp_list$dList), paste("C",index, " vs ", input$group3, sep = ""))
+      }
+      
       contrast$row <- matrix(row(), nrow=1)
       contrast$row[index] = 1
       contrast$row[index3()] = -1
@@ -107,7 +112,12 @@ matrix_build <- eventReactive(input$submit | input$submit1 | input$submit2, {
       for (index1 in 1:length(choices())) {
         if (index == index1) next
         if (index < index1) {
-          comp_list$dList <- c(isolate(comp_list$dList), paste(index, "vs", index1, sep = " "))
+          if(input$DDA_DIA=="TMT"){
+            comp_list$dList <- c(isolate(comp_list$dList), paste(choices()[index], " vs ", choices()[index1], sep = ""))
+          } else{
+            comp_list$dList <- c(isolate(comp_list$dList), paste("C",index, " vs ", "C",index1, sep = ""))
+          }
+          
           contrast$row <- matrix(row(), nrow=1)
           contrast$row[index] = 1
           contrast$row[index1] = -1
