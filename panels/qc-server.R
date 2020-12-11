@@ -40,11 +40,17 @@ observe ({
 })
 
 quantile <- function() {
-  if (input$null == TRUE) {
+  if (input$null == TRUE || input$null1 == TRUE) {
     maxQC <- NULL
   }
   else {
-    maxQC <- input$maxQC
+    if(input$DDA_DIA=="TMT"){
+      maxQC <- input$maxQC1
+    }
+    else{
+      maxQC <- input$maxQC
+    }
+    
   }
   return(maxQC)
 }
@@ -93,7 +99,7 @@ features <- function() {
 # which protein to plot (will add "all" for QCPlot)
 
 output$Which <- renderUI({
-  if (input$type2 == "QCPlot" || input$type1 == "QCPlot") {
+  if ((input$DDA_DIA!="TMT" && input$type2 == "QCPlot") || (input$DDA_DIA=="TMT" && input$type1 == "QCPlot")) {
     if((input$DDA_DIA=="SRM_PRM" && input$filetype=="sky")||(input$DDA_DIA=="DIA" && input$filetype=="ump")){
       selectizeInput("which", "Show plot for", choices = c("", "ALL PROTEINS" = "allonly", unique(get_data()[2])))
     }
@@ -122,7 +128,7 @@ preprocess_data = eventReactive(input$run, {
                                          reference_norm = input$reference_norm,
                                          remove_norm_channel = input$remove_norm_channel,
                                          MBimpute = TRUE,
-                                         maxQuantileforCensored = NULL
+                                         maxQuantileforCensored = quantile()
                                          )
     
   }
@@ -382,5 +388,6 @@ onclick("proceed6", {
   }
   
 })
+
 
 

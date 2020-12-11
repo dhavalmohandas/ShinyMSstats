@@ -83,8 +83,8 @@ sbp_params = sidebarPanel(
     
     # max quantile for censored
     h5("Max quantile for censored", tipify(icon("question-circle"), title = "Max quantile for censored")),
-    checkboxInput("null", label = "Do not apply cutoff to censor missing values"),
-    numericInput("maxQC", NULL, 0.999, 0.000, 1.000, 0.001),
+    checkboxInput("null1", label = "Do not apply cutoff to censor missing values"),
+    numericInput("maxQC1", NULL, 0.999, 0.000, 1.000, 0.001),
     
     
     # MBi
