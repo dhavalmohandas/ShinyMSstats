@@ -3,19 +3,33 @@ title: "Report"
 output: pdf_document
 ---
 
+```{r wrap-hook, echo=F}
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+```
+
 # Introduction
 
 This is the report of the analysis performed with the R package MSstats on the web application MSstats-Shiny.
 The analysis was performed with the following packages:
 
-```{r}
+```{r, linewidth=100}
 sessionInfo()
 ```
 
 The original data was collected using a `r params$p1` acquisition.  
 The summary of the analysed data is:
 
-```{r echo=F}
+```{r echo=F, linewidth=100}
 tryCatch({
   print(str(get_data()))
   print(summary(get_data()))
@@ -49,7 +63,7 @@ The data was preprocessed with the following parameters:
 
 The summary of the preprocessed data is:
 
-```{r echo=F}
+```{r echo=F, linewidth=100}
 tryCatch({
   str(preprocess_data())
 }, error = function(e){
@@ -67,7 +81,7 @@ Plots of preprocessed data can be downloaded in the Quality Control window (plot
 
 The comparisons have been defined as follows:
 
-```{r}
+```{r, linewidth=100}
 tryCatch({
   comp_list$dList
 }, error = function(e){
@@ -78,7 +92,7 @@ tryCatch({
 
 Which result in the comparison matrix:
 
-```{r}
+```{r, linewidth=100}
 tryCatch({
   matrix_build()
 }, error = function(e){
@@ -89,7 +103,7 @@ tryCatch({
 
 The total number of proteins that are differentially expressed in the comparisons at `r input$signif` significance is: `r nrow(SignificantProteins())`.
 
-```{r}
+```{r, linewidth=100}
 tryCatch({
   
   req(SignificantProteins())
