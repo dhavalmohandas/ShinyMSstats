@@ -91,7 +91,7 @@ sbp_params = sidebarPanel(
     h4("5. Imputation"),
     conditionalPanel(condition = "input.censInt == 'NA' || input.censInt == '0'",
                      checkboxInput("MBi", 
-                                   label = p("Model Based imputation", tipify(icon("question-circle"), title = "If unchecked the values set as cutoff for censored will be used")), value = TRUE
+                                   label = p("Model based imputation", tipify(icon("question-circle"), title = "If unchecked the values set as cutoff for censored will be used")), value = TRUE
                      )),
     # cutoff for censored
     conditionalPanel(condition = "input.censInt == 'NA' || input.censInt == '0'",
@@ -115,7 +115,7 @@ sbp_params = sidebarPanel(
   tags$hr(),
   # run 
   
-  actionButton("run", "Run Preprocessing"),
+  actionButton("run", "Run preprocessing"),
   width = 3
 )
 
@@ -144,10 +144,10 @@ main = mainPanel(
                p("Please preprocess data to view quality control plots"),
                conditionalPanel(condition = "input.DDA_DIA==='TMT'",
                                 selectInput("type1",
-                                            label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot"))),
+                                            label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show profile plots"="ProfilePlot"))),
                conditionalPanel(condition = "input.DDA_DIA!=='TMT'",
                                 selectInput("type2",
-                                            label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show Profile plots"="ProfilePlot","Show Condition plot"="ConditionPlot"))),
+                                            label = h5("Select plot type", tipify(icon("question-circle"), title = "Use Profile Plots to view technical/biological variability and missing values; use Condition Plots to view differences in intensity between conditions; use QC Plots to view differences between runs and to check the effects of normalization")), c("Show QC plots"="QCPlot", "Show profile plots"="ProfilePlot","Show Condition plot"="ConditionPlot"))),
                conditionalPanel(condition = "input.type1==='ProfilePlot' || input.type2==='ProfilePlot'",
                                 checkboxInput("summ", "Show plot with summary")
                                 ),
@@ -178,7 +178,7 @@ main = mainPanel(
 
 qc = fluidPage(
   tags$style(HTML('#proceed6{background-color:orange}')),
-  headerPanel("Data Processing"),
+  headerPanel("Data processing"),
   p("Preprocessing of the data is performed through: (i) Log transformation, (ii) Normalisation, (iii) Feature selection, (iv) Imputation for censored missing values, (v) Run-level summarisation.  Please choose preprocessing parameters and hit Run.  More information on the preprocessing step can be found ", 
     a("here", href="https://rdrr.io/bioc/MSstats/man/dataProcess.html", target="_blank")),
   p("Quality of data and preprocessing can be assessed in the plot tab of the main panel."),
@@ -188,7 +188,7 @@ qc = fluidPage(
   sbp_params,
   column(width = 8,
   main,
-  actionButton(inputId = "proceed6", label = "Next Step")
+  actionButton(inputId = "proceed6", label = "Next step")
  ),
  
 )

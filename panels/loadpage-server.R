@@ -470,7 +470,7 @@ output$summary_tables <- renderUI({
           tags$head(
             tags$style(HTML('#proceed2{background-color:orange}'))
           ),
-          actionButton(inputId = "proceed2", label = "Next Step"),
+          actionButton(inputId = "proceed2", label = "Next step"),
           h4("Summary of experimental design"),
           column(width=12, tableOutput('summary1'), style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
           tags$br(),

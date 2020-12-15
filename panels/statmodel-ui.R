@@ -11,7 +11,7 @@ statmodel = fluidPage(
     tags$style(HTML('#submit{background-color:orange}')),
     tags$style(HTML('#clear{background-color:orange}'))
   ),
-  headerPanel("Statistical Model"),
+  headerPanel("Statistical model"),
   p("In this tab a statistical model is built in three steps:"),
   p("(i) Create a contrast matrix with the correct Group comparisons,"), 
   p("(ii) generate the model and "),
@@ -44,7 +44,7 @@ statmodel = fluidPage(
                         sliderInput("signif", 
                                     label = h5("Significance level", tipify(icon("question-circle"), title="Probability of rejecting the null hypothesis given that it is true (probability of type I error)")) , 0, 1, 0.05),
                         tags$hr(),
-                        h4("2. Group Comparison"),
+                        h4("2. Group comparison"),
                         actionButton("calculate", "Start"),
                         tags$hr(),
                         ),
@@ -55,7 +55,7 @@ statmodel = fluidPage(
                  column(12,
                           fluidRow(
                                    selectInput("typeplot", 
-                                               label = h4("3. Visualization - Select plot type"), c("Volcano Plot" = "VolcanoPlot", "Heatmap"="Heatmap", "Comparison Plot"="ComparisonPlot")),
+                                               label = h4("3. Visualization - select plot type"), c("Volcano Plot" = "VolcanoPlot", "Heatmap"="Heatmap", "Comparison Plot"="ComparisonPlot")),
                                    conditionalPanel(condition = "input.typeplot == 'VolcanoPlot'",
                                                     uiOutput("WhichComp")),
                                    conditionalPanel(condition = "input.typeplot == 'VolcanoPlot' && input.DDA_DIA!=='TMT'",
@@ -86,8 +86,8 @@ statmodel = fluidPage(
                                    conditionalPanel(condition = "input.typeplot == 'ComparisonPlot'",
                                                     uiOutput("WhichComp1"))
                                    ),
-                        actionButton("viewresults", "View Plot in browser (only for one comparison/protein)"),
-                        actionButton("plotresults", "Save Plot Results as pdf")
+                        actionButton("viewresults", "View plot in browser (only for one comparison/protein)"),
+                        actionButton("plotresults", "Save plot results as pdf")
                         
                  )
                )

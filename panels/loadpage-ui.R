@@ -11,7 +11,7 @@ sbp_load = sidebarPanel(
                label = h4("1. Type of Acquisition", tipify(icon("question-circle"), 
                                                         title = "Select if the acquisition was Data Independent, 
                                                         Data Dependent or Selected/Parallel Reaction Monitoring")),
-               c("DDA" = "DDA", "DIA" = "DIA", "SRM/PRM" = "SRM_PRM", "TMT"="TMT")),
+               c("DDA" = "DDA", "DIA" = "DIA", "SRM/PRM" = "SRM_PRM", "DDA/TMT"="TMT")),
   
   # upload  
   
@@ -19,7 +19,7 @@ sbp_load = sidebarPanel(
                label = h4("2. Type of File", tipify(icon("question-circle"), 
                                                  title = "Choose input type: sample dataset, classical 10-column dataset, 
                                                  or outputs from Skyline, MaxQuant, Progenesis or Proteome Discoverer")),
-               choices = c("sample dataset" = "sample", "MSstats required format" = "MRF", 
+               choices = c("Example dataset" = "sample", "MSstats required format" = "MRF", 
                            "Skyline" = "sky", "MaxQuant" = "maxq", "Progenesis" = "prog", 
                            "Proteome Discoverer" = "PD", "OpenMS" = "openms", "Spectronaut" = "spec", 
                            "OpenSWATH" = "open", "DIA-Umpire" = "ump", "SpectroMine" = "spmin"), selected = character(0)),

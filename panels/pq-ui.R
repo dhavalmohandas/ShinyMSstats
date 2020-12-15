@@ -1,6 +1,6 @@
 main = mainPanel(
   tabsetPanel(
-    tabPanel("Protein Quantification",
+    tabPanel("Protein quantification",
              fluidRow(
                column(5,
                       wellPanel(
@@ -9,12 +9,12 @@ main = mainPanel(
                           radioButtons("typequant", 
                                        label = h4("Type of summarisation"), 
                                        c("Sample-level summarisation" = "Sample", "Group-level summarisation" = "Group")),
-                          radioButtons("format", "Save as", c("Wide Format" = "matrix", "Long Format" = "long")),
+                          radioButtons("format", "Save as", c("Wide format" = "matrix", "Long format" = "long")),
                           downloadButton("download_summary", "Download")
                         )
                       )
                ),
-               column(7,actionButton(inputId = "proceed4", label = "Next Step")),
+               column(7,actionButton(inputId = "proceed4", label = "Next step")),
                column(7,
                       h4("Table of abundance"),
                       dataTableOutput("abundance")
