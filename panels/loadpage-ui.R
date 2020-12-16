@@ -93,7 +93,15 @@ sbp_load = sidebarPanel(
 
 loadpage = fluidPage(
   useShinyjs(),
-  headerPanel("Upload data"),
+  tags$head(
+    tags$style(HTML("
+      h1 {
+        color: #48ca3b;
+      }
+
+    "))
+  ),
+  headerPanel(list("Upload data")),
   p("To explore this application for 'Type of File' upload two types of datasets:"),
   p("(1) Quantification report from data processing tool."), 
   p("(2) Annotation including experimental design."),
